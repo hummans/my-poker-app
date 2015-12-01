@@ -29,11 +29,3 @@ def check_royal(hands)
 end
 
 #check_royal(give_me_a_hand(meta_deck))
-
-#best_hand(give_me_a_hand(meta_deck))
-
-#best_hand(all_hands_from_cards(["5a","6b","13a","13b","4a","2a","3b"]))
-
-#winning_hand(best_hand(all_hands_from_cards([deck.pop,deck.pop,deck.pop,deck.pop,deck.pop,deck.pop,deck.pop])))
-
-#winning_hand(best_hand(all_hands_from_cards(["5b","5d","5a","4b","3a","7a","8a"])))
