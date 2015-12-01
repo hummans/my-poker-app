@@ -1,3 +1,11 @@
+=begin
+methods for determining the strength of hands. <r> stands for "rank" and is both 
+invoked as a method and declared as a variable when we are concerned with the 
+rank (or integer property) of the cards. <s> stands for "suit" and is both invoked 
+as a method and declared as a variable when we are concerned with the suit (or
+letter property) of the cards.
+=end
+
 def is_straight_flush?(cards)
     
     s = s(cards)
@@ -97,16 +105,23 @@ def is_pair?(cards)
 end
 
 
-def winning_hand(cards)
-    return "ROYAL FLUSH!" if is_straight_flush?(cards) == "royal flush"
-    return "STRAIGHT FLUSH!" if is_straight_flush?(cards)
-    return "FOUR OF A KIND!" if is_four_of_a_kind?(cards)
-    return "FULL HOUSE!" if is_full_house?(cards)
-    return "FLUSH!" if is_flush?(cards)
-    return "STRAIGHT!" if is_straight?(cards)
-    return "THREE OF A KIND!" if is_three_of_a_kind?(cards)
-    return "TWO PAIR!" if is_two_pair?(cards)
-    return "PAIR!" if is_pair?(cards)
+def winning_hand(the_hand)
+    
+    if the_hand.length == 1
+        the_hand = the_hand.flatten
+    
+    else the_hand = the_hand[0]
+    
+    end
+    return "ROYAL FLUSH!" if is_straight_flush?(the_hand) == "royal flush"
+    return "STRAIGHT FLUSH!" if is_straight_flush?(the_hand)
+    return "FOUR OF A KIND!" if is_four_of_a_kind?(the_hand)
+    return "FULL HOUSE!" if is_full_house?(the_hand)
+    return "FLUSH!" if is_flush?(the_hand)
+    return "STRAIGHT!" if is_straight?(the_hand)
+    return "THREE OF A KIND!" if is_three_of_a_kind?(the_hand)
+    return "TWO PAIR!" if is_two_pair?(the_hand)
+    return "PAIR!" if is_pair?(the_hand)
     return "COMPLETE AIR"
 end
 
@@ -139,17 +154,29 @@ def best_hand(hands)
         end
     end
     if best_hand.length > 1
-        if best_hand_score == 9 || best_hand_score == 5
-            best_straight(*best_hand)
+        if best_hand_score == 1
+            best_air(best_hand)
+        elsif best_hand_score == 2
+            best_pair(best_hand)
+        elsif best_hand_score == 3
+            best_two_pair(best_hand)
         elsif best_hand_score == 4
-            best_three_of_a_kind(*best_hand)
+            best_three_of_a_kind(best_hand)
+        elsif best_hand_score == 5 || best_hand_score == 9
+            best_straight(best_hand)
+        elsif best_hand_score == 6
+            best_flush(best_hand)
         elsif best_hand_score == 7
-            best_full_house(*best_hand)
+            best_full_house(best_hand)
         elsif best_hand_score == 8
-            best_four_of_a_kind(*best_hand)
+            best_four_of_a_kind(best_hand)
         else best_hand
         end
     else best_hand
     end
 
 end
+
+#winning_hand(best_hand(all_hands_from_cards([deck.pop,deck.pop,deck.pop,deck.pop,deck.pop,deck.pop,deck.pop])))
+
+#winning_hand(best_hand(all_hands_from_cards(["10b","12d","10d","10c","9b","9c","10a"])))
