@@ -1,9 +1,9 @@
-module handCalculator
+module HandCalculator
 
 =begin
 These helper methods isolate the cards' "rank" (integer properties) and "suit" (letter 
 properties) by mapping them onto a new array. They are crucial to the control flow of this 
-application as they are used in virtually all hand strength and hand comparison methods.
+module as they are used in virtually all hand strength and hand comparison methods.
 =end
 
 def r(cards)
@@ -16,12 +16,9 @@ def s(cards)
 end
 
 
-###########################################################
-
-
 =begin
 This helper method is used in all hands of type <pair; two-pair; three-of-a-kind; full house; 
-or four-of-a-kind> when we are concerned with isolating or excising the part of the hand which
+four-of-a-kind> when we are concerned with isolating or excising the part of the hand which
 contains multiple occurrences of the same rank.
 =end
 
@@ -52,27 +49,65 @@ end
 #which_rank_occurs_n_times?([3,6,6,7], 2)
 
 
-#This helper method is particularly useful for the single-pair hand.
+=begin
+#This helper method is used to slice out any repeat occurrences of ranks in order to isolate the 
+kickers.
+=end
 
-
-def slice_pair(cards)
+def slice_cards(cards, n)
     
     arr = []
     
     cards.each do |rank|
         
-       arr << rank if rank != which_rank_occurs_n_times?(cards, 2)
-   end
+       arr << rank if rank != which_rank_occurs_n_times?(cards, n)
+    end
    
    arr
 end
 
-#######################################################################
 
+=begin
+This recursive method is used to determine the best kickers of any given set of hands 
+where a tie-breaker of this type is needed.
+=end
+
+def assess_the_kickers(hands, i, n)
+        
+    best_hand = []
+        
+    kicker = 0
+        
+    hands.each do |this_hand_unrefined|
+            
+        nonpair_cards = slice_cards(r(this_hand_unrefined), n)
+            
+        if nonpair_cards[i] > kicker
+            kicker = nonpair_cards[i]
+            best_hand = [this_hand_unrefined]
+            
+        elsif nonpair_cards[i] == kicker
+            best_hand << this_hand_unrefined
+        end
+    end
+        
+    if best_hand.length == 1 || i == 0 
+        best_hand
+    else assess_the_kickers(best_hand, i -= 1, n)
+    
+    end
+end
+
+
+=begin
+This method takes a parameter of an array containing either 6 or 7 cards (meant to represent
+the number of cards available to a player at the "turn" or the "river" and return all possible 
+hands. This method is used in tandem with the :best_hand method to find the best hand a player 
+holds at any given point of the game)
+=end
 
 def all_hands_from_cards(cards)
 
-    
     arr = ((2..14).to_a * 4).sort
 
     meta_deck = arr.map.with_index do |x,y|
@@ -90,10 +125,9 @@ def all_hands_from_cards(cards)
 
 
 =begin
-We need to represent cards as ordered index integers from 0..51 for properly sorting
-and generating all possible hands from a six-card or seven-card combination (i.e. 
-"the turn" or "the river") To achieve this, we must first generate a hash from the 
-meta_deck array object.
+We need to represent cards as ordered index integers from 0..51 for properly sorting and 
+generating all possible hands from a six-card or seven-card combination (i.e. "the turn" 
+or "the river") To achieve this, we must first generate a hash from the meta_deck array object.
 =end
 
 #########################################    
@@ -125,7 +159,7 @@ meta_deck array object.
 
             c = indx_values.shuffle
     
-            random_hand = [c.pop, c.pop, c.pop, c.pop, c.pop]
+            random_hand = c[0..4]
     
             all_hands << random_hand.sort
 
@@ -138,7 +172,7 @@ meta_deck array object.
     
             c = indx_values.shuffle
     
-            random_hand = [c.pop, c.pop, c.pop, c.pop, c.pop]
+            random_hand = c[0..4]
     
             all_hands << random_hand.sort
 
@@ -153,7 +187,6 @@ meta_deck array object.
             meta_deck_hash.key(card)
         end
     end
-        
 end
 
 #all_hands_from_cards(["2a","4b","5c","6d","7a","4d","5d"])
@@ -161,7 +194,7 @@ end
 
 
 =begin
-methods for determining the strength of hands. <r> stands for "rank" and is both 
+Methods for determining the strength of hands. <r> stands for "rank" and is both 
 invoked as a method and declared as a variable when we are concerned with the 
 rank (or integer property) of the cards. <s> stands for "suit" and is both invoked 
 as a method and declared as a variable when we are concerned with the suit (or
@@ -268,15 +301,15 @@ end
 
 
 =begin
-When any 2 or more hands result in the same type of hand (e.g. both are full houses), we
-must use tie-breaker methods to deduce which hand/s is/are best. The input parameter is
-always a single array which stores at least 2 sub-arrays. The sub-arrays represent hands
-(of the same hand strength type) and are composed of cards from the meta_deck. Also worth 
-noting is the frequent use of the variables <this_hand> and <this_hand_unrefined>. Since 
-the input params for all of the below methods always contain hands of cards with the "suit" 
-AND "rank" properties intact, we must oftentimes isolate one or the other. <this_hand_unrefined> 
-refers to when the hand has not yet had its cards' properties isolated (the aforementioned
-variables exist as corollaries to the helper methods :r and :s, in fact).
+When any 2 or more hands result in the same type of hand (e.g. both are full houses), we must
+use tie-breaker methods to deduce which hand/s is/are best. Worth noting is the frequent use 
+of the variables <this_hand> and <this_hand_unrefined>. Since the input params for all of the 
+below methods always contain hands of cards with the "suit" AND "rank" properties intact, we 
+must oftentimes isolate one or the other. <this_hand_unrefined> refers to when the hand has not 
+yet had its cards' properties isolated (the aforementioned variables exist as corollaries to the 
+helper methods :r and :s). In these methods, the input parameter is always a single array which 
+stores at least 1 sub-array. Each sub-array represents a hand and is composed of cards from the 
+meta_deck.
 =end
 
 def best_four_of_a_kind(hands)
@@ -301,32 +334,14 @@ def best_four_of_a_kind(hands)
 
     if best_hand.length > 1
 
-        highest_rank = 0
-
-        best_hand.each do |this_hand_unrefined|
-
-            this_hand = r(this_hand_unrefined)
-
-            this_hand.each do |rank|
-
-                if rank != which_rank_occurs_n_times?(this_hand, 4) && rank > highest_rank
-                    highest_rank = rank
-                    best_hand = [this_hand_unrefined]
-                
-                elsif rank != which_rank_occurs_n_times?(this_hand, 4) && rank == highest_rank
-                    best_hand << this_hand_unrefined
-                end
-            
-            end
-        
-        end
-        
-        best_hand
+        assess_the_kickers(best_hand, 4, 0)
     
     else best_hand
     
     end
 end
+
+#best_four_of_a_kind([["5a","5b","5c","5d","10a"],["5a","5b","5c","5d","12a"],["5a","5b","5c","5d","11a"]])
 
 
 def best_full_house(hands)
@@ -498,11 +513,11 @@ def best_flush(hands, n = 4 )
         best_hand
    
     else best_flush(best_hand, n -= 1)
+    
     end
 end
  
 #best_flush([["13a","11a","10a","9a","8a"],["13a","11a","10a","9a","7a"]])
-
 
 =begin
 The only relevant criterion for determining the best flush or straight
@@ -571,7 +586,42 @@ def best_three_of_a_kind(hands)
     
     end
 
+    if best_hand.length > 1
+        
+       assess_the_kickers(best_hand, 1, 3)
     
+    else best_hand
+        
+    end
+end
+
+#best_three_of_a_kind(["11a","11b","11c","12a","10b"], ["11d","11b","11c","10b","12a"]) #returns both
+   
+#best_three_of_a_kind(["11a","11b","11c","9a","12b"],["11d","11b","11c","10b","12a"]) #returns the second arr
+
+=begin
+def best_three_of_a_kind(hands)
+
+    best_hand = []
+
+    highest_rank = 0
+    
+
+    hands.each do |this_hand_unrefined|
+        
+        this_hand = r(this_hand_unrefined)
+        
+        if which_rank_occurs_n_times?(this_hand, 3) > highest_rank
+            best_hand = [this_hand_unrefined]
+            highest_rank = which_rank_occurs_n_times?(this_hand, 3)
+        
+        elsif which_rank_occurs_n_times?(this_hand, 3) == highest_rank
+            best_hand << this_hand_unrefined
+        
+        end
+    
+    end
+
     if best_hand.length > 1
         
         the_highest = 0
@@ -617,10 +667,7 @@ def best_three_of_a_kind(hands)
     
     end
 end
-   
-#best_three_of_a_kind(["11a","11b","11c","12a","10b"], ["11d","11b","11c","10b","12a"]) #returns both
-   
-#best_three_of_a_kind(["11a","11b","11c","9a","12b"],["11d","11b","11c","10b","12a"]) #returns the second arr
+=end
 
 def best_two_pair(hands)
     
@@ -718,8 +765,6 @@ def best_pair(hands)
         
     end
     
-    
-    
     if best_hand.length > 1
         
         best_hand.each do |this_hand_unrefined|
@@ -787,39 +832,11 @@ end
 
 def best_pair(hands)
     
-    def assess_the_kickers(hands, i = 2)
-        
-        best_hand = []
-        
-        kicker = 0
-        
-        hands.each do |this_hand_unrefined|
-            
-            this_hand = r(this_hand_unrefined)
-            
-            nonpair_cards = slice_pair(this_hand)
-            
-            if nonpair_cards[i] > kicker
-                kicker = nonpair_cards[i]
-                best_hand = [this_hand_unrefined]
-            
-            elsif nonpair_cards[i] == kicker
-                best_hand << this_hand_unrefined
-            end
-        end
-        
-        if best_hand.length == 1 || i == 0 
-            best_hand
-        else assess_the_kickers(best_hand, i -= 1)
-        end
-    end
-    
     best_hand = []
     
     top_pair = 0
     
     hands.each do |this_hand_unrefined|
-        
         
         this_hand = r(this_hand_unrefined)
         
@@ -836,11 +853,11 @@ def best_pair(hands)
     if best_hand.length == 1
         best_hand
     else
-        assess_the_kickers(best_hand)
+        assess_the_kickers(best_hand, 2, 2)
     end
 end
 
-best_pair([["14a","14b","11a","10b","6a"],["14a","12b","14b","10c","13a"]]) #returns the second arr
+#best_pair([["14a","14b","11a","10b","6a"],["14a","12b","14b","10c","13a"]]) #returns the second arr
 
 
 def best_air(hands, n = 4)
@@ -877,8 +894,8 @@ def winning_hand(the_hand)
         the_hand = the_hand.flatten
     
     else the_hand = the_hand[0]
-    
     end
+
     return "ROYAL FLUSH!" if is_straight_flush?(the_hand) == "royal flush"
     return "STRAIGHT FLUSH!" if is_straight_flush?(the_hand)
     return "FOUR OF A KIND!" if is_four_of_a_kind?(the_hand)
@@ -943,6 +960,8 @@ def best_hand(hands)
 
 end
 
-#winning_hand(best_hand(all_hands_from_cards([deck.pop,deck.pop,deck.pop,deck.pop,deck.pop,deck.pop,deck.pop])))
+#winning_hand(best_hand(all_hands_from_cards(deck[0..6])))
 
 #winning_hand(best_hand(all_hands_from_cards(["10b","12d","10d","10c","9b","9c","10a"])))
+
+end
