@@ -1,4 +1,9 @@
+
+require_relative "hand_calculator"
+
 class Deck
+
+    include HandCalculator
     
     attr_reader :deck
     
