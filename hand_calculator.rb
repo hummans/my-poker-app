@@ -7,7 +7,7 @@ module as they are used in virtually all hand strength and hand comparison metho
 =end
 
     def r(cards)
-        cards.map { |card| card[0..-2].to_i }.sort
+        cards.map { |card| card.to_i }.sort
     end
 
 
@@ -507,7 +507,6 @@ the case, then we reassign a rank value of 1 to it for our final summation.
             elsif rank_sum == highest_rank_sum
                 best_hand << this_hand
             end
-        
         end
         
         best_hand
