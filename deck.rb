@@ -1,7 +1,6 @@
-
-require_relative "hand_calculator"
-
 class Deck
+
+    require_relative "hand_calculator"
 
     include HandCalculator
     
