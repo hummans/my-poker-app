@@ -30,11 +30,7 @@ module as they are used in virtually all hand strength and hand comparison metho
       end
     end
     
-    if arr.length == 1
-      arr[0]
-    else arr
-    
-    end
+    arr.length == 1 ? arr[0] : arr
   end
 
   #which_rank_occurs_n_times?([3,6,6,7], 2)
@@ -74,9 +70,9 @@ module as they are used in virtually all hand strength and hand comparison metho
 
 =begin
 This method takes a parameter of an array containing either 6 or 7 cards (meant to represent
-the number of cards available to a player at the "turn" or the "river" and return all possible 
-hands. This method is used in tandem with the :best_hand method to find the best hand a player 
-holds at any given point of the game)
+the number of cards available to a player at the "turn" or the "river") and returns all possible 
+hands. Used in tandem with the :best_hand method to find the best hand a player 
+holds at any given point of the game.
 =end
 
   def all_hands_from_cards(cards)
@@ -104,9 +100,7 @@ holds at any given point of the game)
     else return [cards]
     
     end
-    
     all_hands
-
   end
 
   #all_hands_from_cards(["2a","4b","5c","6d","7a","4d","5d"])
@@ -134,7 +128,6 @@ letter property) of the cards.
         true
       else false
       end
-    
     else false
     end
   end
@@ -236,16 +229,11 @@ letter property) of the cards.
       elsif which_rank_occurs_n_times?(this_hand, 4) == highest_rank
         best_hand << this_hand_unrefined
       end
-    
     end
 
-    if best_hand.length > 1
-
-      assess_kickers(best_hand, 4, 0)
+    return best_hand if best_hand.length == 1
     
-    else best_hand
-    
-    end
+    assess_kickers(best_hand, 4, 0)
   end
 
   #best_quads([["5a","5b","5c","5d","10a"],["5a","5b","5c","5d","12a"],["5a","5b","5c","5d","11a"]])
@@ -284,7 +272,6 @@ letter property) of the cards.
       end
       best_hand
     else best_hand
-    
     end
   end
 
@@ -294,7 +281,6 @@ letter property) of the cards.
   def best_flush(hands, n = 4 )
      
     best_hand = []
-   
     highest = 0
  
     hands.each do |this_hand_unrefined|
@@ -310,7 +296,7 @@ letter property) of the cards.
     end
    
     return best_hand if best_hand.length == 1 || n == 0
-   
+    
     best_flush(best_hand, n -= 1)
   end
  
@@ -323,11 +309,11 @@ letter property) of the cards.
     
     hands.each do |this_hand|
 
-      ## reassign the rank value of the ace when it is part of the low straight 
+      ## Reassign the rank value of the ace when it is part of the low straight. 
 
       this_hand[4] = "1" if r(this_hand) == [2,3,4,5,14]
 
-      ##    ##     ##      ##      ##      ##
+      #                     #                           #
   
       rank_sum = r(this_hand).inject(:+)
   
@@ -340,7 +326,6 @@ letter property) of the cards.
       end
     end
     best_hand
-
   end
 
   #best_straight(["18a","4a","12b","13a","9d"], ["29a","8c","8b","9a","2d"]) #returns both
@@ -478,22 +463,19 @@ letter property) of the cards.
 
   #best_air([["4a","13b","12a","11b","10a"],["7a","13b","12b","11c","10a"],["3a","13b","12b","11b","10a"]]) #returns second arr
 
-  def winning_hand(the_hand)
+  def winning_hand(hand)
       
-    if the_hand.length == 1
-      the_hand = the_hand.flatten
-    else the_hand = the_hand[0]
-    end
+    hand = hand.length == 1 ? hand.flatten : hand[0]
 
-    return "ROYAL FLUSH!" if straight_flush(the_hand) == "royal flush"
-    return "STRAIGHT FLUSH!" if straight_flush(the_hand)
-    return "FOUR OF A KIND!" if quads(the_hand)
-    return "FULL HOUSE!" if full_house(the_hand)
-    return "FLUSH!" if flush(the_hand)
-    return "STRAIGHT!" if straight(the_hand)
-    return "THREE OF A KIND!" if trips(the_hand)
-    return "TWO PAIR!" if two_pair(the_hand)
-    return "PAIR!" if pair(the_hand)
+    return "ROYAL FLUSH!" if straight_flush(hand) == "royal flush"
+    return "STRAIGHT FLUSH!" if straight_flush(hand)
+    return "FOUR OF A KIND!" if quads(hand)
+    return "FULL HOUSE!" if full_house(hand)
+    return "FLUSH!" if flush(hand)
+    return "STRAIGHT!" if straight(hand)
+    return "THREE OF A KIND!" if trips(hand)
+    return "TWO PAIR!" if two_pair(hand)
+    return "PAIR!" if pair(hand)
     return "COMPLETE AIR"
   end
 
