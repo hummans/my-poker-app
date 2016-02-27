@@ -1,21 +1,21 @@
 class Deck
 
-    require_relative "hand_calculator"
+  require_relative "hand_calculator"
 
-    include HandCalculator
+  include HandCalculator
     
-    attr_reader :deck
+  attr_reader :deck
     
-    META_DECK = (2..14).flat_map { |rank| ("a".."d").map { |suit| (rank.to_s + suit) } }
+  META_DECK = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }
 
-    def initialize
-        @deck = META_DECK.shuffle
-    end
+  def initialize
+    @deck = META_DECK.shuffle
+  end
     
-    def draw(n)
-        cards = []
-        n.times { cards << @deck.pop }
-        cards
-    end
+  def draw(n)
+    cards = []
+    n.times { cards << @deck.pop }
+    cards
+  end
 
 end

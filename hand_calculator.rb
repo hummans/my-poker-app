@@ -51,15 +51,15 @@ module as they are used in virtually all hand strength and hand comparison metho
     best_hand = []
     kicker = 0
         
-    hands.each do |this_hand_unrefined|
-      nonpair_cards = isolate_kickers(r(this_hand_unrefined), n)
+    hands.each do |hand_unrefined|
+      nonpair_cards = isolate_kickers(r(hand_unrefined), n)
           
       if nonpair_cards[i] > kicker
         kicker = nonpair_cards[i]
-        best_hand = [this_hand_unrefined]
+        best_hand = [hand_unrefined]
           
       elsif nonpair_cards[i] == kicker
-        best_hand << this_hand_unrefined
+        best_hand << hand_unrefined
       end
     end
         
@@ -219,15 +219,15 @@ letter property) of the cards.
     best_hand = []
     highest_rank = 0
 
-    hands.each do |this_hand_unrefined|
-      this_hand = r(this_hand_unrefined)
+    hands.each do |hand_unrefined|
+      hand = r(hand_unrefined)
 
-      if which_rank_occurs_n_times?(this_hand, 4) > highest_rank
-        best_hand = [this_hand_unrefined]
-        highest_rank = which_rank_occurs_n_times?(this_hand, 4)
+      if which_rank_occurs_n_times?(hand, 4) > highest_rank
+        best_hand = [hand_unrefined]
+        highest_rank = which_rank_occurs_n_times?(hand, 4)
       
-      elsif which_rank_occurs_n_times?(this_hand, 4) == highest_rank
-        best_hand << this_hand_unrefined
+      elsif which_rank_occurs_n_times?(hand, 4) == highest_rank
+        best_hand << hand_unrefined
       end
     end
 
@@ -243,15 +243,15 @@ letter property) of the cards.
     best_hand = []
     highest_rank = 0
 
-    hands.each do |this_hand_unrefined|
-      this_hand = r(this_hand_unrefined)
+    hands.each do |hand_unrefined|
+      hand = r(hand_unrefined)
       
-      if which_rank_occurs_n_times?(this_hand, 3) > highest_rank
-        best_hand = [this_hand_unrefined]
-        highest_rank = which_rank_occurs_n_times?(this_hand, 3)
+      if which_rank_occurs_n_times?(hand, 3) > highest_rank
+        best_hand = [hand_unrefined]
+        highest_rank = which_rank_occurs_n_times?(hand, 3)
       
-      elsif which_rank_occurs_n_times?(this_hand, 3) == highest_rank
-        best_hand << this_hand_unrefined
+      elsif which_rank_occurs_n_times?(hand, 3) == highest_rank
+        best_hand << hand_unrefined
       end
     end
 
@@ -259,15 +259,15 @@ letter property) of the cards.
 
       highest_rank = 0
 
-      best_hand.each do |this_hand_unrefined|
-        this_hand = r(this_hand_unrefined)
+      best_hand.each do |hand_unrefined|
+        hand = r(hand_unrefined)
 
-        if which_rank_occurs_n_times?(this_hand, 2) > highest_rank
-          best_hand = [this_hand_unrefined]
-          highest_rank = which_rank_occurs_n_times?(this_hand, 2)
+        if which_rank_occurs_n_times?(hand, 2) > highest_rank
+          best_hand = [hand_unrefined]
+          highest_rank = which_rank_occurs_n_times?(hand, 2)
         
-        elsif which_rank_occurs_n_times?(this_hand, 2) == highest_rank
-          best_hand << this_hand_unrefined
+        elsif which_rank_occurs_n_times?(hand, 2) == highest_rank
+          best_hand << hand_unrefined
         end
       end
       best_hand
@@ -278,28 +278,9 @@ letter property) of the cards.
   #best_full_house([["13a","12b","13c","12a","7d"],["13a","12c","13a","12b","8d"]])
   #best_full_house([["13a","11b","13c","11a","8d"],["13a","12c","13a","12b","8d"]])
 
-  def best_flush(hands, n = 4 )
-     
-    best_hand = []
-    highest = 0
- 
-    hands.each do |this_hand_unrefined|
-      this_hand = r(this_hand_unrefined)
-     
-      if this_hand[n] > highest
-        highest = this_hand[n]
-        best_hand = [this_hand_unrefined]
-     
-      elsif this_hand[n] == highest
-        best_hand << this_hand_unrefined
-      end
-    end
-   
-    return best_hand if best_hand.length == 1 || n == 0
-    
-    best_flush(best_hand, n -= 1)
+  def best_flush(hands)
+    assess_kickers(hands, 4, 1)
   end
- 
   #best_flush([["13a","11a","10a","9a","8a"],["13a","11a","10a","9a","7a"]])
 
   def best_straight(hands)
@@ -307,22 +288,22 @@ letter property) of the cards.
     highest_rank_sum = 0
     best_hand = []
     
-    hands.each do |this_hand|
+    hands.each do |hand|
 
       ## Reassign the rank value of the ace when it is part of the low straight. 
 
-      this_hand[4] = "1" if r(this_hand) == [2,3,4,5,14]
+      hand[4] = "1" if r(hand) == [2,3,4,5,14]
 
       #                     #                           #
   
-      rank_sum = r(this_hand).inject(:+)
+      rank_sum = r(hand).inject(:+)
   
       if rank_sum > highest_rank_sum
         highest_rank_sum = rank_sum
-        best_hand = [this_hand]
+        best_hand = [hand]
   
       elsif rank_sum == highest_rank_sum
-        best_hand << this_hand
+        best_hand << hand
       end
     end
     best_hand
@@ -336,15 +317,15 @@ letter property) of the cards.
     best_hand = []
     highest_rank = 0
     
-    hands.each do |this_hand_unrefined|
-      this_hand = r(this_hand_unrefined)
+    hands.each do |hand_unrefined|
+      hand = r(hand_unrefined)
       
-      if which_rank_occurs_n_times?(this_hand, 3) > highest_rank
-        best_hand = [this_hand_unrefined]
-        highest_rank = which_rank_occurs_n_times?(this_hand, 3)
+      if which_rank_occurs_n_times?(hand, 3) > highest_rank
+        best_hand = [hand_unrefined]
+        highest_rank = which_rank_occurs_n_times?(hand, 3)
       
-      elsif which_rank_occurs_n_times?(this_hand, 3) == highest_rank
-        best_hand << this_hand_unrefined
+      elsif which_rank_occurs_n_times?(hand, 3) == highest_rank
+        best_hand << hand_unrefined
       end
     end
 
@@ -359,50 +340,49 @@ letter property) of the cards.
   def best_two_pair(hands)
       
     best_hand = []
-    top_pair_rank = 0
-    bottom_pair_rank = 0
-    kicker = 0
+    top_pair_max = 0
+    bottom_pair_max = 0
+    kicker_max = 0
     
-    hands.each do |this_hand_unrefined|
-      this_hand = r(this_hand_unrefined)
+    hands.each do |hand_unrefined|
+      hand = r(hand_unrefined)
+      top_pair = (which_rank_occurs_n_times?(hand, 2)).max
       
-      if (which_rank_occurs_n_times?(this_hand, 2)).max > top_pair_rank
-        top_pair_rank = (which_rank_occurs_n_times?(this_hand, 2)).max
-        best_hand = [this_hand_unrefined]
+      if top_pair > top_pair_max
+        top_pair_max = top_pair
+        best_hand = [hand_unrefined]
       
-      elsif (which_rank_occurs_n_times?(this_hand, 2)).max == top_pair_rank
-        best_hand << this_hand_unrefined
+      elsif top_pair == top_pair_max
+        best_hand << hand_unrefined
       end
     end
             
     if best_hand.length > 1
       
-      best_hand.each do |this_hand_unrefined|
-        this_hand = r(this_hand_unrefined)
+      best_hand.each do |hand_unrefined|
+        hand = r(hand_unrefined)
+        bottom_pair = (which_rank_occurs_n_times?(hand, 2)).min
     
-        if (which_rank_occurs_n_times?(this_hand, 2)).min > bottom_pair_rank
-          bottom_pair_rank = (which_rank_occurs_n_times?(this_hand, 2)).min
-          best_hand = [this_hand_unrefined]
+        if bottom_pair > bottom_pair_max
+          bottom_pair_max = bottom_pair
+          best_hand = [hand_unrefined]
         
-        elsif (which_rank_occurs_n_times?(this_hand, 2)).min == bottom_pair_rank
-          best_hand << this_hand_unrefined
+        elsif bottom_pair == bottom_pair_max
+          best_hand << hand_unrefined
         end
       end
     
       if best_hand.length > 1
           
-        best_hand.each do |this_hand_unrefined|
-          this_hand = r(this_hand_unrefined)
-          
-          this_hand.each do |rank|
-              
-            if rank > kicker && !(which_rank_occurs_n_times?(this_hand, 2).include?(rank))
-              kicker = rank
-              best_hand = [this_hand_unrefined]
-                  
-            elsif rank > kicker && !(which_rank_occurs_n_times?(this_hand, 2).include?(rank))
-              best_hand << this_hand_unrefined
-            end
+        best_hand.each do |hand_unrefined|
+          hand = r(hand_unrefined)
+          kicker = which_rank_occurs_n_times?(hand, 1)
+          if kicker > kicker_max
+            kicker_max = kicker
+            best_hand = [hand_unrefined]
+      
+          elsif kicker == kicker_max
+            best_hand << hand_unrefined 
           end
         end
         best_hand
@@ -420,15 +400,15 @@ letter property) of the cards.
     best_hand = []
     top_pair = 0
     
-    hands.each do |this_hand_unrefined|
-      this_hand = r(this_hand_unrefined)
+    hands.each do |hand_unrefined|
+      hand = r(hand_unrefined)
       
-      if which_rank_occurs_n_times?(this_hand, 2) > top_pair
-        top_pair = which_rank_occurs_n_times?(this_hand, 2)
-        best_hand = [this_hand_unrefined]
+      if which_rank_occurs_n_times?(hand, 2) > top_pair
+        top_pair = which_rank_occurs_n_times?(hand, 2)
+        best_hand = [hand_unrefined]
       
-      elsif which_rank_occurs_n_times?(this_hand, 2) == top_pair
-        best_hand << this_hand_unrefined
+      elsif which_rank_occurs_n_times?(hand, 2) == top_pair
+        best_hand << hand_unrefined
       end
     end
     
@@ -439,32 +419,14 @@ letter property) of the cards.
 
   #best_pair([["14a","14b","11a","10b","6a"],["14a","12b","14b","10c","13a"]]) #returns the second arr
 
-  def best_air(hands, n = 4)
-      
-    best_hand = []
-    highest_rank = 0
-    
-    hands.each do |this_hand_unrefined|
-      this_hand = r(this_hand_unrefined)
-      
-      if this_hand[n] > highest_rank
-        highest_rank = this_hand[n]
-        best_hand = [this_hand_unrefined]
-      
-      elsif this_hand[n] == highest_rank
-        best_hand << this_hand_unrefined
-      end
-    end
-    
-    return best_hand if best_hand.length == 1 || n == 0
-    
-    best_air(best_hand, n -= 1)
+  def best_air(hands)
+      assess_kickers(hands, 4, 1)
   end
 
   #best_air([["4a","13b","12a","11b","10a"],["7a","13b","12b","11c","10a"],["3a","13b","12b","11b","10a"]]) #returns second arr
 
   def winning_hand(hand)
-      
+    
     hand = hand.length == 1 ? hand.flatten : hand[0]
 
     return "ROYAL FLUSH!" if straight_flush(hand) == "royal flush"
@@ -499,12 +461,12 @@ letter property) of the cards.
     best_hand = []
     best_hand_score = 0
 
-    hands.each do |this_hand|
-      if evaluate_hand(this_hand) > best_hand_score
-        best_hand = [this_hand]
-        best_hand_score = evaluate_hand(this_hand)
-      elsif evaluate_hand(this_hand) == best_hand_score
-        best_hand << this_hand
+    hands.each do |hand|
+      if evaluate_hand(hand) > best_hand_score
+        best_hand = [hand]
+        best_hand_score = evaluate_hand(hand)
+      elsif evaluate_hand(hand) == best_hand_score
+        best_hand << hand
       end
     end
     if best_hand.length > 1
