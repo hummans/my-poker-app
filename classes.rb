@@ -1,6 +1,6 @@
 class Game
     
-  attr_accessor :game_deck, :pot, :button_player, :other_player, :community_cards, :bp_bet, :op_bet
+  attr_accessor :game_deck, :pot, :button_player, :other_player, :community_cards, :bp_bet, :op_bet, :current_hand
   
   def initialize
       @game_deck = []
@@ -10,6 +10,7 @@ class Game
       @community_cards = []
       @bp_bet = 0
       @op_bet = 0
+      @current_hand = true
   end
   
   def player_deal
@@ -26,11 +27,17 @@ class Game
       @community_cards << @game_deck.shuffled.slice!(0,5)
     elsif @community_cards.length == 3
       @community_cards << @game_deck.shuffled.slice!(0,2)
+    elsif @community_cards.length == 4
+      @community_cards << @game_deck.shuffled.slice!(0,1)
     end
   end
   
-  def switch_positions
+  def new_hand
     @other_player, @button_player = @button_player, @other_player
+    @community_cards = []
+    @other_player.pocket = []
+    @button_player.pocket = []
+    @current_hand = false
   end
   
   def determine_winner
@@ -40,16 +47,16 @@ class Game
     if da_bestest == op_best_hand
       @other_player.chips += @pot
       puts "#{@other_player.name} wins the pot with a #{winning_hand(op_best_hand)}"
-      switch_positions()
+      new_hand()
     elsif da_bestest == bp_best_hand
       @button_player += @pot
       puts "#{@button_player.name} wins the pot with a #{winning_hand(bp_best_hand)}"
-      switch_positions()
+      new_hand()
     else
       puts "Split pot!"
-      @button_player += @pot / 2
-      @other_player += @pot / 2
-      switch_positions()
+      @button_player.chips += @pot / 2
+      @other_player.chips += @pot / 2
+      new_hand()
     end
   end
   
@@ -64,10 +71,10 @@ class Game
   def fold(player)
     if player == @other_player
       @button_player.chips += @pot
-      switch_positions()
+      new_hand()
     elsif player == @button_player
       @other_player.chips += @pot
-      switch_positions()
+      new_hand()
     end
   end
   
@@ -77,20 +84,48 @@ class Game
         @pot += @button_player.chips
         @op_bet = @button_player.chips + @bp_bet
         @other_player.chips -= @button_player.chips
+        puts "#{@button_player.name}, #{@other_player.name} went all-in. Do you wish to call? Type y or n"
+        answer = gets.chomp
+        if answer == "y"
+          call(@button_player)
+        elsif answer == "n"
+          fold(@button_player)
+        end
       else
         @pot += @other_player.chips
         @op_bet = @other_player.chips + @op_bet
         @other_player.chips = 0
+        puts "#{@button_player.name}, #{@other_player.name} went all-in. Do you wish to call? Type y or n"
+        answer = gets.chomp
+        if answer == "y"
+          call(@button_player)
+        elsif answer == "n"
+          fold(@button_player)
+        end        
       end
     elsif player == @button_player
       if @other_player.chips + @op_bet <= @button_player.chips + @bp_bet
         @pot += @other_player.chips
         @bp_bet = @other_player.chips + @op_bet
         @button_player.chips -= @other_player.chips
+        puts "#{@other_player.name}, #{@button_player.name} went all-in. Do you wish to call? Type y or n"
+        answer = gets.chomp
+        if answer == "y"
+          call(@other_player)
+        elsif answer == "n"
+          fold(@other_player)
+        end
       else
         @pot += @button_player.chips
         @bp_bet = @button_player.chips + @bp_bet
         @button_player.chips = 0
+        puts "#{@other_player.name}, #{@button_player.name} went all-in. Do you wish to call? Type y or n"
+        answer = gets.chomp
+        if answer == "y"
+          call(@other_player)
+        elsif answer == "n"
+          fold(@other_player)
+        end
       end
     end
   end
@@ -257,12 +292,16 @@ class Game
   end
       
   def game_logic
-    puts "What is player 1's name?"
-    @button_player.name = gets.chomp
-    puts "What is player 2's name?"
-    @other_player.name = gets.chomp
-    playgame = true
-    while playgame
+    if @button_player.name == ""
+      puts "What is player 1's name?"
+      @button_player.name = gets.chomp
+      puts "What is player 2's name?"
+      @other_player.name = gets.chomp
+    end
+    
+    @current_hand = true
+    
+    while @current_hand
       @game_deck = Deck.new
       player_deal()
       @button_player.chips -= 10
@@ -287,7 +326,6 @@ class Game
 end
 
 class Player
-    
   attr_accessor :name, :chips, :pocket
   
   def initialize
@@ -298,9 +336,7 @@ class Player
 end
 
 class Deck
-  
   attr_accessor :shuffled
-    
   META_DECK = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }
 
   def initialize
