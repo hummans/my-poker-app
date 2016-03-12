@@ -1,3 +1,22 @@
+class Player
+  attr_accessor :name, :chips, :pocket
+  
+  def initialize
+    @name = ""
+    @chips = 1000
+    @pocket = []
+  end
+end
+
+class Deck
+  attr_accessor :shuffled
+  META_DECK = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }
+
+  def initialize
+    @shuffled = META_DECK.shuffle
+  end
+end
+
 class Game
     
   attr_accessor :game_deck, :pot, :button_player, :other_player, :community_cards, :bp_bet, :op_bet, :current_hand
@@ -11,6 +30,15 @@ class Game
       @bp_bet = 0
       @op_bet = 0
       @current_hand = true
+  end
+  
+  def get_player_names
+    if @button_player.name == ""
+      puts "What is player 1's name?"
+      @button_player.name = gets.chomp
+      puts "What is player 2's name?"
+      @other_player.name = gets.chomp
+    end
   end
   
   def player_deal
@@ -32,7 +60,30 @@ class Game
     end
   end
   
-  def new_hand
+  def begin_hand
+    @game_deck = Deck.new
+    @button_player.pocket = @game_deck.shuffled.slice!(0,2)
+    @other_player.pocket = @game_deck.shuffled.slice!(0,2)
+    @button_player.chips -= 10
+    @other_player.chips -= 5
+    @bp_bet = 10
+    @op_bet = 5
+    @pot = 15
+    puts "#{@other_player.name}, you are out of position. You have #{@other_player.chips} chips. The pot is #{@pot}. Your pocket cards are #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
+    action = gets.chomp
+    if action == "f"
+      fold(@other_player)
+      redo
+    elsif action == "r"
+      raze(@other_player)
+    elsif action == "c"
+      call(@other_player)
+    elsif action == "a"
+      all_in(@other_player)
+    end
+  end
+  
+  def end_hand
     @other_player, @button_player = @button_player, @other_player
     @community_cards = []
     @other_player.pocket = []
@@ -71,10 +122,10 @@ class Game
   def fold(player)
     if player == @other_player
       @button_player.chips += @pot
-      new_hand()
+      end_hand()
     elsif player == @button_player
       @other_player.chips += @pot
-      new_hand()
+      end_hand()
     end
   end
   
@@ -171,13 +222,15 @@ class Game
   
   def bet(player)
     if player == @other_player
-      while true
+      bet_loop = true
+      while bet_loop = true
         puts puts "#{@other_player.name}, the pot is #{@pot}. How much would you like to bet?"
         bet_amount = gets.chomp.to_i
         if bet_amount > @button_player.chips
           @pot += @button_player.chips
           @other_player.chips -= @button_player.chips
           @op_bet = @button_player.chips
+          bet_loop = false
         elsif bet_amount < 10
           puts "That's less than a min bet. Please enter at least 10"
           redo
@@ -185,20 +238,34 @@ class Game
           puts "You cannot bet more than your own chip count. Please try again. (If you want to go all-in, type 'a')"
           redo
         else
+          pot_before = @pot
           @op_bet = bet_amount
           @pot += @op_bet
           @other_player.chips -= @op_bet
-          break
+          bet_loop = false
+          puts "#{@other_player.name} has bet #{@op_bet} into a #{pot_before} chip pot. The pot is now #{@pot}. Your pocket cards are #{@button_player.pocket}. #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
+          action = gets.chomp
+          if action == "r"
+            raze(@button_player)
+          elsif action == "f"
+            fold(@button_player)
+          elsif action == "c"
+            call(@button_player)
+          elsif action == "a"
+            all_in(@button_player)
+          end
         end
       end
     elsif player == @button_player
-      while true
+      bet_loop = true
+      while bet_loop = true
         puts "#{@button_player.name}, the pot is #{@pot}. How much would you like to bet?"
         bet_amount = gets.chomp.to_i
         if bet_amount > @other_player.chips
           @pot += @other_player.chips
           @button_player.chips -= @other_player.chips
           @bp_bet = @other_player.chips
+          bet_loop = false
         elsif bet_amount < 10
           puts "That's less than a min bet. Please enter at least 10"
           redo
@@ -206,10 +273,22 @@ class Game
           puts "You cannot bet more than your own chip count. Please try again. (If you want to go all-in, type 'a')"
           redo
         else
+          pot_before = @pot
           @bp_bet = bet_amount
           @pot += @bp_bet
           @button_player.chips -= @bp_bet
-          break
+          bet_loop = false
+          puts "#{@button_player.name} has bet #{@bp_bet} into a #{pot_before} chip pot. The pot is now #{@pot}. Your pocket cards are #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
+          action = gets.chomp
+          if action == "r"
+            raze(@other_player)
+          elsif action == "f"
+            fold(@other_player)
+          elsif action == "c"
+            call(@other_player)
+          elsif action == "a"
+            all_in(@other_player)
+          end
         end
       end
     end
@@ -217,13 +296,22 @@ class Game
       
   def raze(player)
     if player == @other_player
-      while true
+      raze_loop = true
+      while raze_loop = true
         puts "You want to raise the current bet of #{@bp_bet}. How much do you want to raise your bet to?"
         raise_amount = gets.chomp.to_i
         if raise_amount > @button_player.chips + @bp_bet
           @pot += (@button_player.chips + (@bp_bet - @op_bet))
           @other_player.chips -= @button_player.chips + (@bp_bet - @op_bet)
           @op_bet = @button_player.chips + @bp_bet
+          raze_loop = false
+          puts "#{@button_player.name}, #{@other_player.name} has raised you all-in. Do you wish to call? Type y or n"
+          answer = gets.chomp
+          if answer == "y"
+            call(@button_player)
+          elsif answer == "n"
+            fold(@button_player)
+          end
         elsif raise_amount < 20
           puts "That's less than a min raise. Please enter at least 20"
           redo
@@ -238,28 +326,38 @@ class Game
           @other_player.chips -= (raise_amount - @op_bet)
           @op_bet = raise_amount
           puts "Test, woohoo we made it to this conditional branch"
-          break
+          raze_loop = false
+          puts "#{@other_player.name} has raised the bet to #{@op_bet}. The pot is now #{@pot}. Your pocket cards are #{@button_player.pocket}. #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
+          action = gets.chomp
+          if action == "r"
+            raze(@button_player)
+          elsif action == "f"
+            fold(@button_player)
+          elsif action == "c"
+            call(@button_player)
+          elsif action == "a"
+            all_in(@button_player)
+          end
         end
       end
-      puts "#{@other_player.name} has raised it to #{@op_bet}. The pot is now #{@pot}. Your pocket cards are #{@button_player.pocket}. #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
-      action = gets.chomp
-      if action == "r"
-        raze(@button_player)
-      elsif action == "f"
-        fold(@button_player)
-      elsif action == "c"
-        call(@button_player)
-      elsif action == "a"
-        all_in(@button_player)
-      end
+
     elsif player == @button_player
-      while true
+      raze_loop = true
+      while raze_loop = true
         puts "You want to raise the current bet of #{@op_bet}. How much do you want to raise your bet to?"
         raise_amount = gets.chomp.to_i
         if raise_amount > @other_player.chips + @op_bet
           @pot += (@other_player.chips + (@op_bet - @bp_bet))
           @button_player.chips -= @other_player.chips + (@op_bet - @bp_bet)
           @bp_bet = @other_player.chips + @op_bet
+          raze_loop = false
+          puts "#{@other_player.name}, #{@button_player.name} has raised you all-in. Do you wish to call? Type y or n"
+          answer = gets.chomp
+          if answer == "y"
+            call(@other_player)
+          elsif answer == "n"
+            fold(@other_player)
+          end
         elsif raise_amount < 20
           puts "That's less than a min raise. Please enter at least 20"
           redo
@@ -273,74 +371,31 @@ class Game
           @pot += raise_amount - @bp_bet
           @button_player.chips -= (raise_amount - @bp_bet)
           @bp_bet = raise_amount
+          raze_loop = false
           puts "Test, woohoo we made it to this conditional branch"
-          break
+          puts "#{@button_player.name} has raised the bet to #{@bp_bet}. The pot is now #{@pot}. Your pocket cards are #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
+          action = gets.chomp
+          if action == "r"
+            raze(@other_player)
+          elsif action == "f"
+            fold(@other_player)
+          elsif action == "c"
+            call(@other_player)
+          elsif action == "a"
+            all_in(@other_player)
+          end
         end
-      end
-      puts "#{@button_player.name} has raised it to #{@bp_bet}. The pot is now #{@pot}. Your pocket cards are #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
-      action = gets.chomp
-      if action == "r"
-        raze(@other_player)
-      elsif action == "f"
-        fold(@other_player)
-      elsif action == "c"
-        call(@other_player)
-      elsif action == "a"
-        all_in(@other_player)
       end
     end
   end
       
   def game_logic
-    if @button_player.name == ""
-      puts "What is player 1's name?"
-      @button_player.name = gets.chomp
-      puts "What is player 2's name?"
-      @other_player.name = gets.chomp
-    end
-    
+    get_player_names()
     @current_hand = true
     
     while @current_hand
-      @game_deck = Deck.new
-      player_deal()
-      @button_player.chips -= 10
-      @other_player.chips -= 5
-      @bp_bet = 10
-      @op_bet = 5
-      @pot = 15
-      puts "#{@other_player.name}, you are out of position. You have #{@other_player.chips} chips. The pot is #{@pot}. Your pocket cards are #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
-      action = gets.chomp
-      if action == "f"
-        fold(@other_player)
-        redo
-      elsif action == "r"
-        raze(@other_player)
-      elsif action == "c"
-        call(@other_player)
-      elsif action == "a"
-        all_in(@other_player)
-      end
+      begin_hand()
     end  
-  end
-end
-
-class Player
-  attr_accessor :name, :chips, :pocket
-  
-  def initialize
-    @name = ""
-    @chips = 1000
-    @pocket = []
-  end
-end
-
-class Deck
-  attr_accessor :shuffled
-  META_DECK = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }
-
-  def initialize
-    @shuffled = META_DECK.shuffle
   end
 end
 
