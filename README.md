@@ -3,7 +3,7 @@
 
 ###Instructions
 
->Simulate a Texas Holdem Poker Hand in "Single Player Mode."
+>Simulate a Heads-Up Texas Hold'em Poker game in an irb console environment.
 
 #### Step 1:
 
@@ -11,35 +11,14 @@
 
 ####Step 2:
 
-> Navigate to the app's directory from the command line. Then start an IRB session.
+> Navigate to the root of the directory from the command line. Then start an IRB session.
 
 ####Step 3:
 
 > Execute from the command line: 
->>**load './deck.rb'**
+>>**load './game.rb'**
 
 ####Step 4:
 
-> Generate a new  (shuffled) deck instance: 
->>**new_deck = Deck.new**
-
-####Step 5:
-
-> Draw cards from the deck. We will use '7' as our default argument; this simulates a player who has 2 pocket cards and has remained in the hand until the river: 
-
->>**river\_draw = new\_deck.draw(7)**
-
-####Step 6:
-
-> Generate all possible five-card hands from the 7 drawn cards: 
->>**all  =  new\_deck.all\_hands\_from_cards(river\_draw)**
-
-####Step 7:
-
-> Return the best hand(s) from all hands: 
->>**best  =  new\_deck.best\_hand(all)**
-
-####Step 8:
-
-> Return the strength of the best hand(s): 
->>**new_deck.winning\_hand(best)**
+> Enjoy!
+>>The land of fishes and donks!

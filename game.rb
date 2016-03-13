@@ -21,7 +21,7 @@ class Game
       @game_over = false
   end
   
-  def get_player_names
+    def get_player_names
     if @button_player.name == ""
       puts "What is player 1's name?"
       @button_player.name = gets.chomp
@@ -33,18 +33,15 @@ class Game
   def community_deal
     @community_cards.length == 0 ? @community_cards = @game_deck.shuffled.slice!(0,3) : @community_cards << @game_deck.shuffled.shift
     if @community_cards.length == 3
-      puts "#{@other_player.name}, the flop is #{@community_cards}. Your pocket cards are #{@other_player.pocket}. The pot is #{@pot}.
-       You have #{@other_player.chips} left. Type b, c, or a"
+      puts "#{@other_player.name}, the flop is #{@community_cards}. Your pocket cards are #{@other_player.pocket}. The pot is #{@pot}. You have #{@other_player.chips} left. Type b, c, or a"
       action = gets.chomp
       determine_action(@other_player, action, "check/bet")
     elsif @community_cards.length == 4
-      puts "#{@other_player.name}, the turn came #{@community_cards}. Your pocket cards are #{@other_player.pocket}. The pot is #{@pot}.
-       You have #{@other_player.chips} left. Type b, c, or a"
+      puts "#{@other_player.name}, the turn came #{@community_cards}. Your pocket cards are #{@other_player.pocket}. The pot is #{@pot}. You have #{@other_player.chips} left. Type b, c, or a"
       action = gets.chomp
       determine_action(@other_player, action, "check/bet")     
     elsif @community_cards.length == 5
-      puts "#{@other_player.name}, the river came #{@community_cards}. Your pocket cards are #{@other_player.pocket}. The pot is #{@pot}.
-       You have #{@other_player.chips} left. Type b, c, or a"
+      puts "#{@other_player.name}, the river came #{@community_cards}. Your pocket cards are #{@other_player.pocket}. The pot is #{@pot}. You have #{@other_player.chips} left. Type b, c, or a"
       action = gets.chomp
       determine_action(@other_player, action, "check/bet")
     end
@@ -101,7 +98,7 @@ class Game
   
   def check(player)
     if player == @other_player
-      puts "#{@button_player.name}, #{@other_player.name} checked. What would you like to do? Type c, b, a"
+      puts "#{@button_player.name}, #{@other_player.name} checked. The community cards are #{@community_cards}.  Your cards are #{@button_player.pocket}. You have #{@button_player.chips} left. What would you like to do? Type c, b, a"
       action = gets.chomp
       determine_action(@button_player, action, "check/bet")
     elsif player == @button_player
@@ -135,8 +132,7 @@ class Game
     @bp_bet = 10
     @op_bet = 5
     @pot = 15
-    puts "#{@other_player.name}, you are out of position. You have #{@other_player.chips} chips. The pot is #{@pot}. Your pocket cards are
-     #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type c, f, r, or a"
+    puts "#{@other_player.name}, you are out of position. You have #{@other_player.chips} chips. The pot is #{@pot}. Your pocket cards are #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type c, f, r, or a"
     action = gets.chomp
     determine_action(@other_player, action, "call/raise") 
   end
@@ -206,8 +202,7 @@ class Game
         @pot += @button_player.chips
         @op_bet = @button_player.chips + @bp_bet
         @other_player.chips -= @button_player.chips
-        puts "#{@button_player.name}, #{@other_player.name} went all-in with their #{@op_bet} remaining chips. Your pocket cards are
-         #{@button_player.pocket}. You have #{@button_player.chips} left. Calling will put you all in. Do you wish to call? Type y or n"
+        puts "#{@button_player.name}, #{@other_player.name} went all-in with their #{@op_bet} remaining chips. Your pocket cards are #{@button_player.pocket}. You have #{@button_player.chips} left. Calling will put you all in. Do you wish to call? Type y or n"
         answer = gets.chomp
         if answer == "y"
           call(@button_player)
@@ -218,8 +213,7 @@ class Game
         @pot += @other_player.chips
         @op_bet = @other_player.chips + @op_bet
         @other_player.chips = 0
-        puts "#{@button_player.name}, #{@other_player.name} went all-in with their #{@op_bet} remaining chips. Your pocket cards are
-         #{@button_player.pocket}. You have #{@button_player.chips} left. Do you wish to call? Type y or n"
+        puts "#{@button_player.name}, #{@other_player.name} went all-in with their #{@op_bet} remaining chips. Your pocket cards are #{@button_player.pocket}. You have #{@button_player.chips} left. Do you wish to call? Type y or n"
         answer = gets.chomp
         if answer == "y"
           call(@button_player)
@@ -232,8 +226,7 @@ class Game
         @pot += @other_player.chips
         @bp_bet = @other_player.chips + @op_bet
         @button_player.chips -= @other_player.chips
-        puts "#{@other_player.name}, #{@button_player.name} went all-in with their #{@bp_bet} remaining chips. Your pocket cards are
-         #{@other_player.pocket}. You have #{@other_player.chips} left. Calling will put you all in. Do you wish to call? Type y or n"
+        puts "#{@other_player.name}, #{@button_player.name} went all-in with their #{@bp_bet} remaining chips. Your pocket cards are #{@other_player.pocket}. You have #{@other_player.chips} left. Calling will put you all in. Do you wish to call? Type y or n"
         answer = gets.chomp
         if answer == "y"
           call(@other_player)
@@ -244,8 +237,7 @@ class Game
         @pot += @button_player.chips
         @bp_bet = @button_player.chips + @bp_bet
         @button_player.chips = 0
-        puts "#{@other_player.name}, #{@button_player.name} went all-in with their #{@bp_bet} remaining chips. Your pocket cards are 
-         #{@other_player.pocket}. You have #{@other_player.chips} left. Do you wish to call? Type y or n"
+        puts "#{@other_player.name}, #{@button_player.name} went all-in with their #{@bp_bet} remaining chips. Your pocket cards are #{@other_player.pocket}. You have #{@other_player.chips} left. Do you wish to call? Type y or n"
         answer = gets.chomp
         if answer == "y"
           call(@other_player)
@@ -267,11 +259,15 @@ class Game
         if @button_player.chips == 0
           see_river()
           determine_winner()
-        elsif @community_cards.length < 5 && (@community_cards.length > 0 || @pot > 15)
+        elsif @community_cards.length < 5 && (@community_cards.length > 0 || @pot > 20)
           community_deal()
+        elsif @pot == 20
+          @op_bet = 10
+          @bp_bet = 10
+          puts "#{@button_player.name}, #{@other_player.name} limped like a little bitch. Your cards are #{@button_player.pocket}. What would you like to do? Type c, r, a"
+          action = gets.chomp
+          determine_action(@button_player, action, "call/raise")
         else
-          puts op_bet_before
-          return
           determine_winner()
         end
       else 
@@ -306,7 +302,7 @@ class Game
   def bet(player)
     if player == @other_player
       bet_loop = true
-      while bet_loop = true
+      while bet_loop == true
         puts "#{@other_player.name}, the pot is #{@pot}. How much would you like to bet?"
         bet_amount = gets.chomp.to_i
         if bet_amount > @button_player.chips
@@ -333,15 +329,14 @@ class Game
           @pot += @op_bet
           @other_player.chips -= @op_bet
           bet_loop = false
-          puts "#{@button_player.name}, #{@other_player.name} has bet #{@op_bet} into a #{pot_before} chip pot. The pot is now #{@pot}. 
-          Your pocket cards are #{@button_player.pocket}. #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
+          puts "#{@button_player.name}, #{@other_player.name} has bet #{@op_bet} into a #{pot_before} chip pot. The pot is now #{@pot}. Your pocket cards are #{@button_player.pocket}. #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
           action = gets.chomp
           determine_action(@button_player, action, "call/raise") 
         end
       end
     elsif player == @button_player
-      bet_loop = true
-      while bet_loop = true
+      bet_loop == true
+      while bet_loop == true
         puts "#{@button_player.name}, the pot is #{@pot}. How much would you like to bet?"
         bet_amount = gets.chomp.to_i
         if bet_amount > @other_player.chips
@@ -368,8 +363,7 @@ class Game
           @pot += @bp_bet
           @button_player.chips -= @bp_bet
           bet_loop = false
-          puts "#{@other_player.name}, #{@button_player.name} has bet #{@bp_bet} into a #{pot_before} chip pot. 
-           The pot is now #{@pot}. Your pocket cards are #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
+          puts "#{@other_player.name}, #{@button_player.name} has bet #{@bp_bet} into a #{pot_before} chip pot. The pot is now #{@pot}. Your pocket cards are #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
           action = gets.chomp
           determine_action(@other_player, action, "call/raise") 
         end
@@ -380,7 +374,7 @@ class Game
   def raze(player)
     if player == @other_player
       raze_loop = true
-      while raze_loop = true
+      while raze_loop == true
         puts "You want to raise the current bet of #{@bp_bet}. How much do you want to raise your bet to?"
         raise_amount = gets.chomp.to_i
         if raise_amount > @button_player.chips + @bp_bet
@@ -410,8 +404,7 @@ class Game
           @op_bet = raise_amount
           puts "Test, woohoo we made it to this conditional branch"
           raze_loop = false
-          puts "#{@button_player.name}, #{@other_player.name} has raised the bet to #{@op_bet}. The pot is now #{@pot}. Your pocket cards
-           are #{@button_player.pocket}. #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
+          puts "#{@button_player.name}, #{@other_player.name} has raised the bet to #{@op_bet}. The pot is now #{@pot}. Your pocket cards are #{@button_player.pocket}. #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
           action = gets.chomp
           determine_action(@button_player, action, "call/raise") 
         end
@@ -419,7 +412,7 @@ class Game
 
     elsif player == @button_player
       raze_loop = true
-      while raze_loop = true
+      while raze_loop == true
         puts "You want to raise the current bet of #{@op_bet}. How much do you want to raise your bet to?"
         raise_amount = gets.chomp.to_i
         if raise_amount > @other_player.chips + @op_bet
@@ -448,8 +441,7 @@ class Game
           @button_player.chips -= (raise_amount - @bp_bet)
           @bp_bet = raise_amount
           raze_loop = false
-          puts "#{@other_player.name}, #{@button_player.name} has raised the bet to #{@bp_bet}. The pot is now #{@pot}. Your pocket cards
-           are #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
+          puts "#{@other_player.name}, #{@button_player.name} has raised the bet to #{@bp_bet}. The pot is now #{@pot}. Your pocket cards are #{@other_player.pocket}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
           action = gets.chomp
           determine_action(@other_player, action, "call/raise") 
         end
