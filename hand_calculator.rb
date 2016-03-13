@@ -292,7 +292,7 @@ letter property) of the cards.
 
       ## Reassign the rank value of the ace when it is part of the low straight. 
 
-      hand[4] = "1" if r(hand) == [2,3,4,5,14]
+      r(hand)[4] = 1 if r(hand) == [2,3,4,5,14]
 
       #                     #                           #
   
