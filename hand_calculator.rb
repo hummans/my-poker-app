@@ -514,31 +514,31 @@ letter property) of the cards.
             to_put += "|♠    |"
           end
         elsif i == 2
-          if !cards[j].scan(/2/).empty? && cards[j].scan(/1/).empty?
+          if (cards[j][0] =~ /2/)
             to_put += "|  2  |"
-          elsif !cards[j].scan(/3/).empty? && cards[j].scan(/1/).empty?
+          elsif (cards[j][0] =~ /3/)
             to_put += "|  3  |"
-          elsif !cards[j].scan(/4/).empty? && cards[j].scan(/1/).empty?
+          elsif (cards[j][0] =~ /4/)
             to_put += "|  4  |"
-          elsif !cards[j].scan(/5/).empty?
+          elsif (cards[j][0] =~ /5/)
             to_put += "|  5  |"
-          elsif !cards[j].scan(/6/).empty?
+          elsif (cards[j][0] =~ /6/)
             to_put += "|  6  |"
-          elsif !cards[j].scan(/7/).empty?
+          elsif (cards[j][0] =~ /7/)
             to_put += "|  7  |"
-          elsif !cards[j].scan(/8/).empty?
+          elsif (cards[j][0] =~ /8/)
             to_put += "|  8  |"
-          elsif !cards[j].scan(/9/).empty?
+          elsif (cards[j][0] =~ /9/)
             to_put += "|  9  |"
-          elsif !cards[j].scan(/10/).empty?
+          elsif (cards[j][0..1] =~ /10/)
             to_put += "|  10 |"
-          elsif !cards[j].scan(/11/).empty?
+          elsif (cards[j][0..1] =~ /11/)
             to_put += "|  J  |"
-          elsif !cards[j].scan(/12/).empty?
+          elsif (cards[j][0..1] =~ /12/)
             to_put += "|  Q  |"
-          elsif !cards[j].scan(/13/).empty?
+          elsif (cards[j][0..1] =~ /13/)
             to_put += "|  K  |"
-          elsif !cards[j].scan(/14/).empty?
+          elsif (cards[j][0..1] =~ /14/)
             to_put += "|  A  |"
           end
         elsif i == 3
@@ -559,4 +559,5 @@ letter property) of the cards.
     end
     puts to_put
   end
+  
 end

@@ -32,15 +32,18 @@ class Game
   def community_deal
     @community_cards.length == 0 ? @community_cards = @game_deck.shuffled.slice!(0,3) : @community_cards << @game_deck.shuffled.shift
     if @community_cards.length == 3
-      puts "#{@other_player.name}, the pot is now #{@pot}. You have #{@other_player.chips} chips left. Type b, c, or a #{visual(@community_cards)} #{visual(@other_player.pocket)}"
+      puts_cards("other")
+      puts "#{@other_player.name}, the pot is now #{@pot}. You have #{@other_player.chips} chips left. Type b, c, or a"
       action = gets.chomp
       determine_action(@other_player, action, "check/bet")
     elsif @community_cards.length == 4
-      puts "#{@other_player.name}, the pot is now #{@pot}. You have #{@other_player.chips} chips left. Type b, c, or a  #{visual(@community_cards)} #{visual(@other_player.pocket)}"
+      puts_cards("other")
+      puts "#{@other_player.name}, the pot is now #{@pot}. You have #{@other_player.chips} chips left. Type b, c, or a"
       action = gets.chomp
       determine_action(@other_player, action, "check/bet")     
     elsif @community_cards.length == 5
-      puts "#{@other_player.name}, the pot is now #{@pot}. You have #{@other_player.chips} chips left. Type b, c, or a  #{visual(@community_cards)} #{visual(@other_player.pocket)}"
+      puts_cards("other")
+      puts "#{@other_player.name}, the pot is now #{@pot}. You have #{@other_player.chips} chips left. Type b, c, or a"
       action = gets.chomp
       determine_action(@other_player, action, "check/bet")
     end
@@ -105,7 +108,7 @@ class Game
     @bp_bet = 10
     @op_bet = 5
     @pot = 15
-    puts "#{@other_player.name}, you are out of position. You have #{@other_player.chips} chips. The pot is #{@pot}. #{visual(@other_player.pocket)} #{@bp_bet - @op_bet} chips to call. Type c, f, r, or a"
+    puts "#{@other_player.name}, you are out of position and first to act. You have #{@other_player.chips} chips. The pot is #{@pot}. #{visual(@other_player.pocket)} #{@bp_bet - @op_bet} chips to call. Type c, f, r, or a"
     action = gets.chomp
     determine_action(@other_player, action, "call/raise") 
   end
@@ -208,10 +211,23 @@ class Game
       return true
     end
   end
+  
+  def puts_cards(player)
+    if player == "other"
+      puts "\n\n"
+      puts "#{visual(@community_cards)} ^^Community cards^^"
+      puts "#{visual(@other_player.pocket)}^Pocket cards^"
+    elsif player == "button"
+      puts "\n\n"
+      puts "#{visual(@community_cards)} ^^Community cards^^"
+      puts "#{visual(@button_player.pocket)}^Pocket cards^"
+    end
+  end
 
   def check(player)
     if player == @other_player
-      puts "#{@button_player.name}, #{@other_player.name} checked. #{visual(@community_cards)} #{visual(@button_player.pocket)} You have #{@button_player.chips} left. What would you like to do? Type c, b, a"
+      puts_cards("button")
+      puts "#{@button_player.name}, #{@other_player.name} checked. The pot is #{@pot}. You have #{@button_player.chips} chips left. What would you like to do? Type c, b, a"
       action = gets.chomp
       determine_action(@button_player, action, "check/bet")
     elsif player == @button_player
@@ -248,7 +264,7 @@ class Game
         elsif @pot == 20
           @op_bet = 10
           @bp_bet = 10
-          puts "#{@button_player.name}, #{@other_player.name} limped in. #{visual(@button_player.pocket)} What would you like to do? Type c, r, a"
+          puts "#{@button_player.name}, #{@other_player.name} limped in. You are on the button. What would you like to do? Type c, r, a #{visual(@button_player.pocket)}"
           action = gets.chomp
           determine_action(@button_player, action, "call/raise")
         else
@@ -291,7 +307,8 @@ class Game
           @other_player.chips -= @button_player.chips
           @op_bet = @button_player.chips
           bet_loop = false
-          puts "#{@button_player.name}, #{@other_player.name} has put you all-in. #{visual(@button_player.pocket)} #{visual(@community_cards)} Would you like to call?"
+          puts_cards("button")
+          puts "#{@button_player.name}, #{@other_player.name} has put you all-in. Would you like to call? Type y or n"
           answer = gets.chomp
           if answer == "y"
             call(@button_player)
@@ -311,8 +328,9 @@ class Game
           @op_bet = bet_amount
           @pot += @op_bet
           @other_player.chips -= @op_bet
-          bet_loop = false          
-          puts "#{@button_player.name}, #{@other_player.name} has bet #{@op_bet} into a #{pot_before} chip pot. The pot is now #{@pot}. #{visual(@button_player.pocket)} #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
+          bet_loop = false
+          puts_cards("button")
+          puts "#{@button_player.name}, #{@other_player.name} has bet #{@op_bet} into a #{pot_before} chip pot. The pot is now #{@pot}. #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
           action = gets.chomp
           determine_action(@button_player, action, "call/raise") 
         end
@@ -320,7 +338,6 @@ class Game
     elsif player == @button_player
       bet_loop = true
       while bet_loop == true
-        puts "Why the fuck is this executing after (a bet by the @button_player, then an all-in by other_player, and then a call by the @button_player)??"
         puts "#{@button_player.name}, the pot is #{@pot}. How much would you like to bet?"
         bet_amount = gets.chomp.to_i
         if bet_amount > @other_player.chips
@@ -328,7 +345,8 @@ class Game
           @button_player.chips -= @other_player.chips
           @bp_bet = @other_player.chips
           bet_loop = false
-          puts "#{@other_player.name}, #{@button_player.name} has put you all-in. You cards are #{visual(@other_player.pocket)} #{visual(@community_cards)} Would you like to call?"
+          puts_cards("other")
+          puts "#{@other_player.name}, #{@button_player.name} has put you all-in. Would you like to call?"
           answer = gets.chomp
           if answer == "y"
             call(@other_player)
@@ -349,7 +367,8 @@ class Game
           @pot += @bp_bet
           @button_player.chips -= @bp_bet
           bet_loop = false
-          puts "#{@other_player.name}, #{@button_player.name} has bet #{@bp_bet} into a #{pot_before} chip pot. The pot is now #{@pot}. #{visual(@other_player.pocket)} #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
+          puts_cards("other")
+          puts "#{@other_player.name}, #{@button_player.name} has bet #{@bp_bet} into a #{pot_before} chip pot. The pot is now #{@pot}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
           action = gets.chomp
           determine_action(@other_player, action, "call/raise")
         end
@@ -368,6 +387,7 @@ class Game
           @other_player.chips -= @button_player.chips + (@bp_bet - @op_bet)
           @op_bet = @button_player.chips + @bp_bet
           raze_loop = false
+          puts_cards("button")
           puts "#{@button_player.name}, #{@other_player.name} has raised you all-in. Do you wish to call? Type y or n"
           answer = gets.chomp
           if answer == "y"
@@ -391,7 +411,8 @@ class Game
           @other_player.chips -= (raise_amount - @op_bet)
           @op_bet = raise_amount
           raze_loop = false
-          puts "#{@button_player.name}, #{@other_player.name} has raised the bet to #{@op_bet}. The pot is now #{@pot}. #{visual(@button_player.pocket)} #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
+          puts_cards("button")
+          puts "#{@button_player.name}, #{@other_player.name} has raised the bet to #{@op_bet}. The pot is now #{@pot}. #{@op_bet - @bp_bet} chips to call. Type f, c, r, or a"
           action = gets.chomp
           determine_action(@button_player, action, "call/raise") 
         end
@@ -407,6 +428,7 @@ class Game
           @button_player.chips -= @other_player.chips + (@op_bet - @bp_bet)
           @bp_bet = @other_player.chips + @op_bet
           raze_loop = false
+          puts_cards("other")
           puts "#{@other_player.name}, #{@button_player.name} has raised you all-in. Do you wish to call? Type y or n"
           answer = gets.chomp
           if answer == "y"
@@ -430,7 +452,8 @@ class Game
           @button_player.chips -= (raise_amount - @bp_bet)
           @bp_bet = raise_amount
           raze_loop = false
-          puts "#{@other_player.name}, #{@button_player.name} has raised the bet to #{@bp_bet}. The pot is now #{@pot}. #{visual(@other_player.pocket)} #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
+          puts_cards("other")
+          puts "#{@other_player.name}, #{@button_player.name} has raised the bet to #{@bp_bet}. The pot is now #{@pot}. #{@bp_bet - @op_bet} chips to call. Type f, c, r, or a"
           action = gets.chomp
           determine_action(@other_player, action, "call/raise") 
         end
@@ -440,15 +463,13 @@ class Game
 
   def all_in(player)
     if player == @other_player
-      if @button_player.chips + @bp_bet < @other_player.chips + @op_bet
-        puts "TEST #{@pot} #{@op_bet} #{@other_player.chips} #{@bp_bet} #{@button_player.chips}"
-        @op_bet = @button_player.chips + (@bp_bet)
+      if @button_player.chips + @bp_bet <= @other_player.chips + @op_bet
         other_player_before = @other_player.chips
-        puts @other_player.chips
-        @pot += (@button_player.chips + @bp_bet) ##EDITED THIS       
-        @other_player.chips -= (@button_player.chips + @bp_bet) ##AND THIS
-        puts "#{@button_player.name}, #{@other_player.name} went all-in with their #{other_player_before} remaining chips. #{visual(@button_player.pocket)} You have #{@button_player.chips} left. Calling will put you all in. Do you wish to call? Type y or n"
-        puts "TEST #{@other_player.chips} #{@op_bet} #{@pot}"
+        @pot += (@button_player.chips + @bp_bet - @op_bet)
+        @other_player.chips -= (@button_player.chips + @bp_bet - @op_bet)
+        @op_bet = @button_player.chips + (@bp_bet - @op_bet)
+        puts_cards("button")
+        puts "#{@button_player.name}, #{@other_player.name} went all-in with their #{other_player_before} remaining chips.  You have #{@button_player.chips} left. Calling will put you all in. Do you wish to call? Type y or n"
         answer = gets.chomp
         if answer == "y"
           call(@button_player)
@@ -458,6 +479,7 @@ class Game
       else
         @pot += @other_player.chips
         @op_bet = @other_player.chips + @op_bet
+        puts_cards("button")
         puts "#{@button_player.name}, #{@other_player.name} went all-in with their #{@other_player.chips} remaining chips. #{visual(@button_player.pocket)} You have #{@button_player.chips} left. Do you wish to call? Type y or n"
         @other_player.chips = 0
         answer = gets.chomp
@@ -469,10 +491,12 @@ class Game
       end
     elsif player == @button_player
       if @other_player.chips + @op_bet <= @button_player.chips + @bp_bet
-        @pot += @other_player.chips
-        @bp_bet = @other_player.chips + @op_bet
-        @button_player.chips -= @other_player.chips
-        puts "#{@other_player.name}, #{@button_player.name} went all-in with their #{@bp_bet} remaining chips. #{visual(@other_player.pocket)} You have #{@other_player.chips} left. Calling will put you all in. Do you wish to call? Type y or n"
+        button_player_before = @button_player.chips
+        @pot += (@other_player.chips + @op_bet - @bp_bet)
+        @button_player.chips -= (@other_player.chips + @op_bet - @bp_bet)
+        @bp_bet = (@other_player.chips + @op_bet - @bp_bet)
+        puts_cards("other")
+        puts "#{@other_player.name}, #{@button_player.name} went all-in with their #{@bp_bet} remaining chips. You have #{@other_player.chips} left. Calling will put you all in. Do you wish to call? Type y or n"
         answer = gets.chomp
         if answer == "y"
           call(@other_player)
@@ -483,6 +507,7 @@ class Game
         @pot += @button_player.chips
         @bp_bet = @button_player.chips + @bp_bet
         @button_player.chips = 0
+        puts_cards("other")
         puts "#{@other_player.name}, #{@button_player.name} went all-in with their #{@bp_bet} remaining chips. #{visual(@other_player.pocket)} You have #{@other_player.chips} left. Do you wish to call? Type y or n"
         answer = gets.chomp
         if answer == "y"
