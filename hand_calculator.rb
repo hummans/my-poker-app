@@ -6,6 +6,8 @@ properties) by mapping them onto a new array. They are crucial to the control fl
 module as they are used in virtually all hand strength and hand comparison methods.
 =end
 
+  META_DECK = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }
+
   def r(cards)
     cards.map { |card| card.to_i }.sort
   end
@@ -427,7 +429,8 @@ letter property) of the cards.
 
   def winning_hand(hand)
     
-    hand = hand.length == 1 ? hand.flatten : hand[0]
+    # note: the below hand processing statement is not needed for the console version of game.
+    #hand = hand.length == 1 ? hand.flatten : hand[0]
 
     return "ROYAL FLUSH!" if straight_flush(hand) == "royal flush"
     return "STRAIGHT FLUSH!" if straight_flush(hand)
@@ -491,5 +494,69 @@ letter property) of the cards.
     else best_hand
     end
   end
-#winning_hand(best_hand(all_hands_from_cards(["10b","12d","10d","10c","9b","9c","10a"])))
+  
+  def visual(cards)
+    to_put = ""
+    i = 0
+    while i < 4
+      j = 0
+      while j < cards.size
+        if i == 0
+          to_put += " ______"
+        elsif i == 1
+          if META_DECK.index(cards[j]) % 4 == 0
+            to_put += "|♦    |"
+          elsif META_DECK.index(cards[j]) % 4 == 1
+            to_put += "|♥    |"
+          elsif META_DECK.index(cards[j]) % 4 == 2
+            to_put += "|♣    |"
+          elsif META_DECK.index(cards[j]) % 4 == 3
+            to_put += "|♠    |"
+          end
+        elsif i == 2
+          if !cards[j].scan(/2/).empty? && cards[j].scan(/1/).empty?
+            to_put += "|  2  |"
+          elsif !cards[j].scan(/3/).empty? && cards[j].scan(/1/).empty?
+            to_put += "|  3  |"
+          elsif !cards[j].scan(/4/).empty? && cards[j].scan(/1/).empty?
+            to_put += "|  4  |"
+          elsif !cards[j].scan(/5/).empty?
+            to_put += "|  5  |"
+          elsif !cards[j].scan(/6/).empty?
+            to_put += "|  6  |"
+          elsif !cards[j].scan(/7/).empty?
+            to_put += "|  7  |"
+          elsif !cards[j].scan(/8/).empty?
+            to_put += "|  8  |"
+          elsif !cards[j].scan(/9/).empty?
+            to_put += "|  9  |"
+          elsif !cards[j].scan(/10/).empty?
+            to_put += "|  10 |"
+          elsif !cards[j].scan(/11/).empty?
+            to_put += "|  J  |"
+          elsif !cards[j].scan(/12/).empty?
+            to_put += "|  Q  |"
+          elsif !cards[j].scan(/13/).empty?
+            to_put += "|  K  |"
+          elsif !cards[j].scan(/14/).empty?
+            to_put += "|  A  |"
+          end
+        elsif i == 3
+          if META_DECK.index(cards[j]) % 4 == 0
+            to_put += "|____♦|"
+          elsif META_DECK.index(cards[j]) % 4 == 1
+            to_put += "|____♥|"
+          elsif META_DECK.index(cards[j]) % 4 == 2
+            to_put += "|____♣|"
+          elsif META_DECK.index(cards[j]) % 4 == 3
+            to_put += "|____♠|"
+          end
+        end
+        j += 1
+      end
+      to_put += "\n"
+      i += 1
+    end
+    puts to_put
+  end
 end
