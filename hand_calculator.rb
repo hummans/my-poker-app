@@ -6,7 +6,7 @@ properties) by mapping them onto a new array. They are crucial to the control fl
 module as they are used in virtually all hand strength and hand comparison methods.
 =end
 
-  META_DECK = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }
+  META_DECK = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }.freeze
 
   def r(cards)
     cards.map { |card| card.to_i }.sort

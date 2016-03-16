@@ -8,10 +8,10 @@ class Game
 
   include HandCalculator
     
-  attr_accessor :game_deck, :pot, :button_player, :other_player, :community_cards, :bp_bet, :op_bet
+  attr_accessor :deck, :pot, :button_player, :other_player, :community_cards, :bp_bet, :op_bet
   
   def initialize
-      @game_deck = []
+      @deck = []
       @pot = 0
       @button_player = Player.new
       @other_player = Player.new
@@ -20,17 +20,30 @@ class Game
       @op_bet = 0
   end
   
-  def get_player_names
+  def begin_game
     if @button_player.name == ""
+      puts "."
+      sleep(0.35)
+      puts "."
+      sleep(0.35)
+      puts "."
+      sleep(0.35)
+      puts "Welcome to Sam Hickey's Poker Madness!\n\n"
+      sleep(2)
+      puts "Let's begin!"
+      sleep(1.25)
+      puts "\n"
       puts "What is player 1's name?"
       @button_player.name = gets.chomp.capitalize
-      puts "What is player 2's name?"
+      sleep(0.15)
+      puts "\nAnd, what is player 2's name?"
       @other_player.name = gets.chomp.capitalize
+      new_hand_notification()
     end
   end
   
   def community_deal
-    @community_cards.length == 0 ? @community_cards = @game_deck.shuffled.slice!(0,3) : @community_cards << @game_deck.shuffled.shift
+    @community_cards.length == 0 ? @community_cards = @deck.slice!(0,3) : @community_cards << @deck.shift
     if @community_cards.length == 3
       puts_cards("other")
       puts "#{@other_player.name}, the pot is now #{@pot}. You have #{@other_player.chips} chips left. Type b, c, or a"
@@ -100,46 +113,48 @@ class Game
   def new_hand
     @other_player, @button_player = @button_player, @other_player
     @community_cards = []
-    @game_deck = Deck.new
-    @button_player.pocket = @game_deck.shuffled.slice!(0,2)
-    @other_player.pocket = @game_deck.shuffled.slice!(0,2)
+    @deck = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }.shuffle
+    @button_player.pocket = @deck.slice!(0,2)
+    @other_player.pocket = @deck.slice!(0,2)
     @button_player.chips -= 10
     @other_player.chips -= 5
     @bp_bet = 10
     @op_bet = 5
     @pot = 15
-    puts "#{@other_player.name}, you are out of position and first to act. You have #{@other_player.chips} chips. The pot is #{@pot}. #{visual(@other_player.pocket)} #{@bp_bet - @op_bet} chips to call. Type c, f, r, or a"
+    puts "\n\n"
+    puts_cards("other")
+    puts "#{@other_player.name}, you are out of position and first to act. You have #{@other_player.chips} chips. The pot is #{@pot}. #{@bp_bet - @op_bet} chips to call. Type c, f, r, or a"
     action = gets.chomp
-    determine_action(@other_player, action, "call/raise") 
+    determine_action(@other_player, action, "call/raise")
   end
 
   def new_hand_notification
-    sleep(2.5)
+    sleep(0.5)
+    puts "\n"
     puts "Dealing new hand..."
-    sleep(0.75)
+    sleep(0.60)
     print "Wait a moment"
-    sleep(0.75)
+    sleep(0.55)
     print "."
-    sleep(0.75)
+    sleep(0.55)
     print "."
-    sleep(0.75)
+    sleep(0.55)
     print "."
-    sleep(0.75)
+    sleep(0.55)
     print "."
-    sleep(0.75)
-    puts "\n\n\n\n"
+    puts "\n"
     new_hand()
   end
   
   def see_river
     if @community_cards.length == 0
-      @community_cards << @game_deck.shuffled.slice!(0,5)
+      @community_cards << @deck.slice!(0,5)
       @community_cards.flatten!
     elsif @community_cards.length == 3
-      @community_cards << @game_deck.shuffled.slice!(0,2)
+      @community_cards << @deck.slice!(0,2)
       @community_cards.flatten!
     elsif @community_cards.length == 4
-      @community_cards << @game_deck.shuffled.slice!(0,1)
+      @community_cards << @deck.slice!(0,1)
       @community_cards.flatten!
     end
   end
@@ -148,16 +163,31 @@ class Game
     op_best_hand = best_hand(all_hands_from_cards(@community_cards + @other_player.pocket)).length > 1 ? best_hand(all_hands_from_cards(@community_cards + @other_player.pocket))[0] : best_hand(all_hands_from_cards(@community_cards + @other_player.pocket)).flatten
     bp_best_hand = best_hand(all_hands_from_cards(@community_cards + @button_player.pocket)).length > 1 ? best_hand(all_hands_from_cards(@community_cards + @button_player.pocket))[0] : best_hand(all_hands_from_cards(@community_cards + @button_player.pocket)).flatten
     da_bestest = best_hand([op_best_hand.flatten, bp_best_hand.flatten]).length > 1 ? best_hand([op_best_hand.flatten, bp_best_hand.flatten]) : best_hand([op_best_hand.flatten, bp_best_hand.flatten]).flatten
-    puts "Community cards: #{visual(@community_cards)}\n\n"
+    puts "The community cards are:\n\n"
+    sleep(1)
+    puts "Community cards: #{visual(@community_cards)}\n\n\n"
+    sleep(2)
+    puts "#{@other_player.name}'s pocket cards and best hand are:\n\n"
+    sleep(1)
     puts "#{@other_player.name}'s pocket cards: #{visual(@other_player.pocket)}"
-    puts "#{@other_player.name}'s best hand: #{winning_hand(op_best_hand)}#{visual(op_best_hand)} \n\n"
+    puts "#{@other_player.name}'s best hand: #{winning_hand(op_best_hand)}#{visual(op_best_hand)}\n\n\n"
+    sleep(2)
+    puts "#{@button_player.name}'s pocket cards and best hand are:\n\n"
+    sleep(1)
     puts "#{@button_player.name}'s pocket cards: #{visual(@button_player.pocket)}"
-    puts "#{@button_player.name}'s best hand: #{winning_hand(op_best_hand)}#{visual(bp_best_hand)} \n\n"
-    puts "The best hand: #{visual(da_bestest)}"
+    puts "#{@button_player.name}'s best hand: #{winning_hand(op_best_hand)}#{visual(bp_best_hand)}\n\n\n"
+    sleep(2)
+    puts "THE best hand IS:\n\n"
+    sleep(1)
+
     
     if da_bestest == op_best_hand
       @other_player.chips += @pot
+      puts "#{visual(da_bestest)} The best hand: #{@other_player.name}'s!\n\n\n"
       puts "#{@other_player.name}'s hand! #{@other_player.name} wins the pot with a #{winning_hand(op_best_hand)}\n\n\n"
+      sleep(1.25)
+      print "WOOHOO!"
+      puts "\n\n\n"
       if game_over?()
         return
       else
@@ -165,7 +195,11 @@ class Game
       end
     elsif da_bestest == bp_best_hand
       @button_player.chips += @pot
+      puts "#{visual(da_bestest)} The best hand: #{@other_player.name}'s!\n\n\n"
       puts "#{@button_player.name}'s hand! #{@button_player.name} wins the pot with a #{winning_hand(bp_best_hand)}\n\n\n"
+      sleep(1.25)
+      print "WOOHOO!"
+      puts "\n\n\n"
       if game_over?()
         return
       else
@@ -173,8 +207,10 @@ class Game
       end
     else
       puts "Split pot!\n\n\n\n"
-      @button_player.chips += @pot.to_f / 2
-      @other_player.chips += @pot.to_f / 2
+      @button_player.chips += @pot / 2
+      @other_player.chips += @pot / 2
+      sleep(1.25)
+      puts "Let's divvy that pot up!"
       new_hand_notification()
     end
   end
@@ -183,21 +219,21 @@ class Game
     if type == "all-in"
       puts "All-in! To the river! Determining winner..."
       puts "."
-      sleep(1)
+      sleep(0.75)
       puts "."
-      sleep(1)
+      sleep(0.75)
       puts "."
-      sleep(1)
+      sleep(0.75)
       see_river()
       determine_winner()
     elsif type == "check/call"
       puts "Determining winner..."
       puts "."
-      sleep(1)
+      sleep(0.75)
       puts "."
-      sleep(1)
+      sleep(0.75)
       puts "."
-      sleep(1)
+      sleep(0.75)
       determine_winner()
     end
   end
@@ -215,12 +251,12 @@ class Game
   def puts_cards(player)
     if player == "other"
       puts "\n\n"
-      puts "#{visual(@community_cards)} ^^Community cards^^"
-      puts "#{visual(@other_player.pocket)}^Pocket cards^"
+      puts "#{visual(@community_cards)} ^^Community cards^^" unless @community_cards.empty?
+      puts "#{visual(@other_player.pocket)}^Pocket cards^\n\n"
     elsif player == "button"
       puts "\n\n"
-      puts "#{visual(@community_cards)} ^^Community cards^^"
-      puts "#{visual(@button_player.pocket)}^Pocket cards^"
+      puts "#{visual(@community_cards)} ^^Community cards^^" unless @community_cards.empty?
+      puts "#{visual(@button_player.pocket)}^Pocket cards^\n\n"
     end
   end
 
@@ -242,10 +278,10 @@ class Game
   def fold(player)
     if player == @other_player
       @button_player.chips += @pot
-      new_hand()
+      new_hand_notification()
     elsif player == @button_player
       @other_player.chips += @pot
-      new_hand()
+      new_hand_notification()
     end
   end
 
@@ -264,7 +300,8 @@ class Game
         elsif @pot == 20
           @op_bet = 10
           @bp_bet = 10
-          puts "#{@button_player.name}, #{@other_player.name} limped in. You are on the button. What would you like to do? Type c, r, a #{visual(@button_player.pocket)}"
+          puts_cards("button")
+          puts "#{@button_player.name}, #{@other_player.name} limped in. You are on the button. What would you like to do? Type c, r, a"
           action = gets.chomp
           determine_action(@button_player, action, "call/raise")
         else
@@ -520,8 +557,7 @@ class Game
   end
   
   def game_logic
-    get_player_names()
-    new_hand()
+    begin_game()
   end
 end
 
