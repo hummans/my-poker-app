@@ -175,7 +175,7 @@ class Game
     puts "#{@button_player.name}'s pocket cards and best hand are:\n\n"
     sleep(1)
     puts "#{@button_player.name}'s pocket cards: #{visual(@button_player.pocket)}"
-    puts "#{@button_player.name}'s best hand: #{winning_hand(op_best_hand)}#{visual(bp_best_hand)}\n\n\n"
+    puts "#{@button_player.name}'s best hand: #{winning_hand(bp_best_hand)}#{visual(bp_best_hand)}\n\n\n"
     sleep(2)
     puts "THE best hand IS:\n\n"
     sleep(1)
