@@ -195,7 +195,7 @@ class Game
       end
     elsif da_bestest == bp_best_hand
       @button_player.chips += @pot
-      puts "#{visual(da_bestest)} The best hand: #{@other_player.name}'s!\n\n\n"
+      puts "#{visual(da_bestest)} The best hand: #{@button_player.name}'s!\n\n\n"
       puts "#{@button_player.name}'s hand! #{@button_player.name} wins the pot with a #{winning_hand(bp_best_hand)}\n\n\n"
       sleep(1.25)
       print "WOOHOO!"
