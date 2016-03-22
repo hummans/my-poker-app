@@ -4,8 +4,6 @@ class Game
 
   require_relative "player"
 
-  require_relative "deck"
-
   include HandCalculator
     
   attr_accessor :deck, :pot, :button_player, :other_player, :community_cards, :bp_bet, :op_bet
