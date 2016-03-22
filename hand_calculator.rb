@@ -496,7 +496,12 @@ letter property) of the cards.
   end
   
   def visual(cards)
+    
+    card_hash = { "2" => " 2", "3" => " 3", "4" => " 4", "5" => " 5", "6" => " 6", "7" => " 7", 
+      "8" => " 8", "9" => " 9", "10" => "10", "11" => "J ", "12" => "Q ", "13" => "K ", "14" => "A " }
+    suits = [ "♦", "♥", "♣", "♠" ]
     to_put = ""
+    
     i = 0
     while i < 4
       j = 0
@@ -504,53 +509,15 @@ letter property) of the cards.
         if i == 0
           to_put += " ______"
         elsif i == 1
-          if META_DECK.index(cards[j]) % 4 == 0
-            to_put += "|♦    |"
-          elsif META_DECK.index(cards[j]) % 4 == 1
-            to_put += "|♥    |"
-          elsif META_DECK.index(cards[j]) % 4 == 2
-            to_put += "|♣    |"
-          elsif META_DECK.index(cards[j]) % 4 == 3
-            to_put += "|♠    |"
-          end
+          to_put += "|#{suits[ META_DECK.index(cards[j]) % 4 ]}    |"
         elsif i == 2
-          if (cards[j][0] =~ /2/)
-            to_put += "|  2  |"
-          elsif (cards[j][0] =~ /3/)
-            to_put += "|  3  |"
-          elsif (cards[j][0] =~ /4/)
-            to_put += "|  4  |"
-          elsif (cards[j][0] =~ /5/)
-            to_put += "|  5  |"
-          elsif (cards[j][0] =~ /6/)
-            to_put += "|  6  |"
-          elsif (cards[j][0] =~ /7/)
-            to_put += "|  7  |"
-          elsif (cards[j][0] =~ /8/)
-            to_put += "|  8  |"
-          elsif (cards[j][0] =~ /9/)
-            to_put += "|  9  |"
-          elsif (cards[j][0..1] =~ /10/)
-            to_put += "|  10 |"
-          elsif (cards[j][0..1] =~ /11/)
-            to_put += "|  J  |"
-          elsif (cards[j][0..1] =~ /12/)
-            to_put += "|  Q  |"
-          elsif (cards[j][0..1] =~ /13/)
-            to_put += "|  K  |"
-          elsif (cards[j][0..1] =~ /14/)
-            to_put += "|  A  |"
+          if cards[j].to_i < 10 
+            to_put += "| #{card_hash[cards[j][0]]}  |"
+          elsif cards[j].to_i >= 10
+            to_put += "|  #{card_hash[cards[j][0..1]]} |"
           end
         elsif i == 3
-          if META_DECK.index(cards[j]) % 4 == 0
-            to_put += "|____♦|"
-          elsif META_DECK.index(cards[j]) % 4 == 1
-            to_put += "|____♥|"
-          elsif META_DECK.index(cards[j]) % 4 == 2
-            to_put += "|____♣|"
-          elsif META_DECK.index(cards[j]) % 4 == 3
-            to_put += "|____♠|"
-          end
+          to_put += "|____#{suits[ META_DECK.index(cards[j]) % 4 ]}|" 
         end
         j += 1
       end
