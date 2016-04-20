@@ -406,26 +406,26 @@ module HandCalculator
   
 end
 
-puts best_hand([["4a","13b","12a","11b","10a"],["7a","13b","12b","11c","10a"],
-["3a","13b","12b","11b","10a"]]).inspect # returns second arr
+# puts best_hand([["4a","13b","12a","11b","10a"],["7a","13b","12b","11c","10a"],
+# ["3a","13b","12b","11b","10a"]]).inspect # returns second arr
 
-puts best_hand([["14a","14b","11a","10b","6a"],["14a","12b","14b","10c","13a"],
-["14a","12b","14b","11c","13a"]]).inspect # returns the third arr
+# puts best_hand([["14a","14b","11a","10b","6a"],["14a","12b","14b","10c","13a"],
+# ["14a","12b","14b","11c","13a"]]).inspect # returns the third arr
 
-puts best_hand([["13a","13b","10a","10b","14a"],["10a","10b","13b","13c","12a"],
-["10a","10b","13b","13c","11a"]]).inspect # returns first arr
+# puts best_hand([["13a","13b","10a","10b","14a"],["10a","10b","13b","13c","12a"],
+# ["10a","10b","13b","13c","11a"]]).inspect # returns first arr
 
-puts best_hand([["11a","11b","11c","9a","12b"],["11d","11b","11c","10b","12a"],
-["11d","11b","11c","8b","12a"]]).inspect # returns second arr
+# puts best_hand([["11a","11b","11c","9a","12b"],["11d","11b","11c","10b","12a"],
+# ["11d","11b","11c","8b","12a"]]).inspect # returns second arr
 
-puts best_hand([["2a","3a","4a","5a","14a"],["2a","3a","4a","5a","6a"],
-["3a","4a","5a","6a","7a"]]).inspect # returns third arr
+# puts best_hand([["2a","3a","4a","5a","14a"],["2a","3a","4a","5a","6a"],
+# ["3a","4a","5a","6a","7a"]]).inspect # returns third arr
 
-puts best_hand([["13a","11a","10a","9a","8a"],["13a","11a","10a","9a","7a"],
-["13a","11a","10a","9a","6a"]]).inspect # returns first arr
+# puts best_hand([["13a","11a","10a","9a","8a"],["13a","11a","10a","9a","7a"],
+# ["13a","11a","10a","9a","6a"]]).inspect # returns first arr
 
-puts best_hand([["13a","11b","13c","11a","11d"],["13a","12c","13a","12b","12d"],
-["13a","11b","13c","11a","11d"]]).inspect # returns second arr
+# puts best_hand([["13a","11b","13c","11a","11d"],["13a","12c","13a","12b","12d"],
+# ["13a","11b","13c","11a","11d"]]).inspect # returns second arr
 
-puts best_hand([["5a","5b","5c","5d","10a"],["5a","5b","5c","5d","12a"],
-["5a","5b","5c","5d","11a"]]).inspect #returns second arr
+# puts best_hand([["5a","5b","5c","5d","10a"],["5a","5b","5c","5d","12a"],
+# ["5a","5b","5c","5d","11a"]]).inspect #returns second arr
