@@ -16,6 +16,7 @@ class Game
       @community_cards = []
       @bp_bet = 0
       @op_bet = 0
+      begin_game()
   end
   
   def begin_game
@@ -553,10 +554,6 @@ class Game
       end
     end
   end
-  
-  def game_logic
-    begin_game()
-  end
 end
 
-Game.new.game_logic()
+Game.new
