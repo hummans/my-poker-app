@@ -1,11 +1,5 @@
 module HandCalculator
 
-=begin
-These helper methods isolate the cards' "rank" (integer properties) and "suit" (letter 
-properties) by mapping them onto a new array. They are crucial to the control flow of this 
-module as they are used in virtually all hand strength and hand comparison methods.
-=end
-
   META_DECK = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }.freeze
 
   def r(cards)
@@ -17,11 +11,12 @@ module as they are used in virtually all hand strength and hand comparison metho
     cards.map { |card| card[-1] }
   end
 
+  
   def which_rank_occurs_n_times?(cards, n)
     
     arr = []
-
     n_occurrences_hash = Hash.new(0)
+    
     cards.each do |rank|
       n_occurrences_hash[rank] += 1
     end
@@ -35,8 +30,7 @@ module as they are used in virtually all hand strength and hand comparison metho
     arr.length == 1 ? arr[0] : arr
   end
 
-  #which_rank_occurs_n_times?([3,6,6,7], 2)
-
+  
   def isolate_kickers(cards, n)
       
     kickers = []
@@ -48,6 +42,7 @@ module as they are used in virtually all hand strength and hand comparison metho
     kickers
   end
 
+  
   def assess_kickers(hands, i, n)
           
     best_hand = []
@@ -70,13 +65,7 @@ module as they are used in virtually all hand strength and hand comparison metho
     assess_kickers(best_hand, i -= 1, n)
   end
 
-=begin
-This method takes a parameter of an array containing either 6 or 7 cards (meant to represent
-the number of cards available to a player at the "turn" or the "river") and returns all possible 
-hands. Used in tandem with the :best_hand method to find the best hand a player 
-holds at any given point of the game.
-=end
-
+  
   def all_hands_from_cards(cards)
 
     all_hands = []
@@ -105,20 +94,32 @@ holds at any given point of the game.
     all_hands
   end
 
-  #all_hands_from_cards(["2a","4b","5c","6d","7a","4d","5d"])
+  
+  def deduce_best_hand(arr, best_hand, hands, best_hand_score = nil)
+    
+    arr.each_with_index.inject(0) do |max_val, (val, index)|
+      if val > max_val
+        if best_hand_score
+          best_hand_score = val
+        end
+        best_hand = [hands[index]]
+        val
+      elsif val == max_val
+        best_hand.push(hands[index])
+        val
+      else
+        max_val
+      end
+    end
+  
+    if best_hand_score
+      return [best_hand, best_hand_score]
+    else
+      return best_hand
+    end
+  end
 
-=begin
-Methods for determining the strength of hands. <r> stands for "rank" and is both 
-invoked as a method and declared as a variable when we are concerned with the 
-rank (or integer property) of the cards. <s> stands for "suit" and is both invoked 
-as a method and declared as a variable when we are concerned with the suit (or
-letter property) of the cards.
-=end
-
-  def straight_flush(cards)
-      
-    s = s(cards)
-    r = r(cards)
+  def straight_flush(r, s)
 
     if s[0] == s[1] && s[1] == s[2] && s[2] == s[3] && s[3] == s[4]
       
@@ -135,9 +136,7 @@ letter property) of the cards.
   end
 
 
-  def quads(cards)
-      
-    r = r(cards)
+  def quads(r)
     
     if (r[0] == r[1] && r[1] == r[2] && r[2] == r[3]) || (r[1] == r[2] && r[2] == r[3] && r[3] == r[4])
       true
@@ -146,9 +145,7 @@ letter property) of the cards.
   end
 
 
-  def full_house(cards)
-      
-    r = r(cards)
+  def full_house(r)
 
     if ((r[0] == r[1] && r[1] == r[2]) && r[3] == r[4]) || (r[0] == r[1] && (r[2] == r[3] && r[3] == r[4]))
       true
@@ -157,9 +154,7 @@ letter property) of the cards.
   end
 
 
-  def flush(cards)
-      
-    s = s(cards)
+  def flush(s)
     
     if s[0] == s[1] && s[1] == s[2] && s[2] == s[3] && s[3] == s[4]
       true
@@ -168,9 +163,7 @@ letter property) of the cards.
   end
 
 
-  def straight(cards)
-
-    r = r(cards)
+  def straight(r)
     
     if r[4] - r[3] == 1 && r[3] - r[2] == 1 && r[2] - r[1] == 1 && r[1] - r[0] == 1
       true
@@ -181,10 +174,8 @@ letter property) of the cards.
   end
 
 
-  def trips(cards)
-      
-    r = r(cards)
-    
+  def trips(r)
+
     if (r[0] == r[1] && r[1] == r[2]) || (r[1] == r[2] && r[2] == r[3]) || (r[2] == r[3] && r[3] == r[4])
       true
     else false
@@ -192,9 +183,7 @@ letter property) of the cards.
   end
 
 
-  def two_pair(cards)
-      
-    r = r(cards)
+  def two_pair(r)
     
     if (r[0] == r[1] && r[2] == r[3]) || (r[1] == r[2] && r[3] == r[4]) || (r[0] == r[1] && r[3] == r[4])
       true
@@ -203,9 +192,7 @@ letter property) of the cards.
   end
 
 
-  def pair(cards)
-      
-    r = r(cards)
+  def pair(r)
     
     if r[0] == r[1] || r[1] == r[2] || r[2] == r[3] || r[3] == r[4]
       true
@@ -213,219 +200,124 @@ letter property) of the cards.
     end
   end
 
-  # When any 2 or more hands result in the same type of hand (e.g. both are full houses), we must
-  # use tie-breaker methods to deduce which hand/s is/are best.
 
   def best_quads(hands)
 
-    best_hand = []
-    highest_rank = 0
-
-    hands.each do |hand_unrefined|
-      hand = r(hand_unrefined)
-
-      if which_rank_occurs_n_times?(hand, 4) > highest_rank
-        best_hand = [hand_unrefined]
-        highest_rank = which_rank_occurs_n_times?(hand, 4)
-      
-      elsif which_rank_occurs_n_times?(hand, 4) == highest_rank
-        best_hand << hand_unrefined
-      end
-    end
-
-    return best_hand if best_hand.length == 1
+    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
     
-    assess_kickers(best_hand, 4, 0)
+    quad_cards = rank_arrs.map do |hand|
+      which_rank_occurs_n_times?(hand, 4)
+    end
+    
+    best_hand = deduce_best_hand(quad_cards, best_hand, hands)
+    return best_hand if best_hand.length == 1
+    assess_kickers(best_hand, 0, 4)
   end
 
-  #best_quads([["5a","5b","5c","5d","10a"],["5a","5b","5c","5d","12a"],["5a","5b","5c","5d","11a"]])
 
   def best_full_house(hands)
-
-    best_hand = []
-    highest_rank = 0
-
-    hands.each do |hand_unrefined|
-      hand = r(hand_unrefined)
-      
-      if which_rank_occurs_n_times?(hand, 3) > highest_rank
-        best_hand = [hand_unrefined]
-        highest_rank = which_rank_occurs_n_times?(hand, 3)
-      
-      elsif which_rank_occurs_n_times?(hand, 3) == highest_rank
-        best_hand << hand_unrefined
-      end
+  
+    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
+    
+    trip_cards = rank_arrs.map do |hand|
+      which_rank_occurs_n_times?(hand, 3)
     end
-
-    if best_hand.length > 1
-
-      highest_rank = 0
-
-      best_hand.each do |hand_unrefined|
-        hand = r(hand_unrefined)
-
-        if which_rank_occurs_n_times?(hand, 2) > highest_rank
-          best_hand = [hand_unrefined]
-          highest_rank = which_rank_occurs_n_times?(hand, 2)
-        
-        elsif which_rank_occurs_n_times?(hand, 2) == highest_rank
-          best_hand << hand_unrefined
-        end
-      end
-      best_hand
-    else best_hand
+    
+    pair_cards = rank_arrs.map do |hand|
+      which_rank_occurs_n_times?(hand, 2)
     end
+    
+    best_hand = deduce_best_hand(trip_cards, best_hand, hands)
+    
+    return best_hand if best_hand.length == 1
+    best_hand = deduce_best_hand(pair_cards, best_hand, hands)
   end
 
-  #best_full_house([["13a","12b","13c","12a","7d"],["13a","12c","13a","12b","8d"]])
-  #best_full_house([["13a","11b","13c","11a","8d"],["13a","12c","13a","12b","8d"]])
 
   def best_flush(hands)
     assess_kickers(hands, 4, 1)
   end
-  #best_flush([["13a","11a","10a","9a","8a"],["13a","11a","10a","9a","7a"]])
+
 
   def best_straight(hands)
       
-    highest_rank_sum = 0
-    best_hand = []
-    
-    hands.each do |hand|
-
-      ## Reassign the rank value of the ace when it is part of the low straight. 
-
-      r(hand)[4] = 1 if r(hand) == [2,3,4,5,14]
-
-      #                     #                           #
-  
-      rank_sum = r(hand).inject(:+)
-  
-      if rank_sum > highest_rank_sum
-        highest_rank_sum = rank_sum
-        best_hand = [hand]
-  
-      elsif rank_sum == highest_rank_sum
-        best_hand << hand
-      end
+    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
+    rank_sums = rank_arrs.map do |rank_arr|
+      rank_arr[4] = 1 if (rank_arr[4] == 14 && rank_arr[0] == 2)
+      rank_arr.inject(:+)
     end
-    best_hand
+    
+    deduce_best_hand(rank_sums, best_hand, hands)
   end
 
-  #best_straight(["18a","4a","12b","13a","9d"], ["29a","8c","8b","9a","2d"]) #returns both
-  #best_straight(["2a","3a","4a","5a","14a"], ["2a","3a","4a","5a","6a"]) #returns the second arr
 
   def best_trips(hands)
-
-    best_hand = []
-    highest_rank = 0
     
-    hands.each do |hand_unrefined|
-      hand = r(hand_unrefined)
-      
-      if which_rank_occurs_n_times?(hand, 3) > highest_rank
-        best_hand = [hand_unrefined]
-        highest_rank = which_rank_occurs_n_times?(hand, 3)
-      
-      elsif which_rank_occurs_n_times?(hand, 3) == highest_rank
-        best_hand << hand_unrefined
-      end
+    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
+    
+    trip_cards = rank_arrs.map do |hand|
+      which_rank_occurs_n_times?(hand, 3)
     end
+
+    best_hand = deduce_best_hand(trip_cards, best_hand, hands)
 
     return best_hand if best_hand.length == 1
     
     assess_kickers(best_hand, 1, 3)
   end
 
-  #best_trips([["11a","11b","11c","12a","10b"], ["11d","11b","11c","10b","12a"]]) #returns both
-  #best_trips([["11a","11b","11c","9a","12b"],["11d","11b","11c","10b","12a"]]) #returns the second arr
 
   def best_two_pair(hands)
-      
-    best_hand = []
-    top_pair_max = 0
-    bottom_pair_max = 0
-    kicker_max = 0
+
+    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
     
-    hands.each do |hand_unrefined|
-      hand = r(hand_unrefined)
-      top_pair = (which_rank_occurs_n_times?(hand, 2)).max
-      
-      if top_pair > top_pair_max
-        top_pair_max = top_pair
-        best_hand = [hand_unrefined]
-      
-      elsif top_pair == top_pair_max
-        best_hand << hand_unrefined
-      end
+    top_pairs = rank_arrs.map do |rank_arr|
+      which_rank_occurs_n_times?(rank_arr, 2).max
     end
-            
-    if best_hand.length > 1
+    bottom_pairs = rank_arrs.map do |rank_arr|
+      which_rank_occurs_n_times?(rank_arr, 2).min
+    end
+    kickers = rank_arrs.map do |rank_arr|
+      which_rank_occurs_n_times?(rank_arr, 1) 
+    end
+    
+    best_hand = deduce_best_hand(top_pairs, best_hand, hands)
+    
+    if best_hand.length > 1 
+      best_hand = deduce_best_hand(bottom_pairs, best_hand, hands)
       
-      best_hand.each do |hand_unrefined|
-        hand = r(hand_unrefined)
-        bottom_pair = (which_rank_occurs_n_times?(hand, 2)).min
-    
-        if bottom_pair > bottom_pair_max
-          bottom_pair_max = bottom_pair
-          best_hand = [hand_unrefined]
-        
-        elsif bottom_pair == bottom_pair_max
-          best_hand << hand_unrefined
-        end
-      end
-    
       if best_hand.length > 1
-          
-        best_hand.each do |hand_unrefined|
-          hand = r(hand_unrefined)
-          kicker = which_rank_occurs_n_times?(hand, 1)
-          if kicker > kicker_max
-            kicker_max = kicker
-            best_hand = [hand_unrefined]
-      
-          elsif kicker == kicker_max
-            best_hand << hand_unrefined 
-          end
-        end
+        best_hand = deduce_best_hand(kickers, best_hand, hands)
+        
+      else
         best_hand
-      else best_hand
       end
-    else best_hand
+    else
+      best_hand
     end
   end
 
-  #which_rank_occurs_n_times?([2,3,3,2,5], 2).min
-  #best_two_pair([["13a","13b","10a","10b","14a"],["10a","10b","13b","13c","9a"]]) #returns the first arr
 
   def best_pair(hands)
+
+    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
     
-    best_hand = []
-    top_pair = 0
-    
-    hands.each do |hand_unrefined|
-      hand = r(hand_unrefined)
-      
-      if which_rank_occurs_n_times?(hand, 2) > top_pair
-        top_pair = which_rank_occurs_n_times?(hand, 2)
-        best_hand = [hand_unrefined]
-      
-      elsif which_rank_occurs_n_times?(hand, 2) == top_pair
-        best_hand << hand_unrefined
-      end
+    pair_cards = rank_arrs.map do |hand|
+      which_rank_occurs_n_times?(hand, 2)
     end
+
+    best_hand = deduce_best_hand(pair_cards, best_hand, hands)
     
     return best_hand if best_hand.length == 1
      
     assess_kickers(best_hand, 2, 2)
   end
 
-  #best_pair([["14a","14b","11a","10b","6a"],["14a","12b","14b","10c","13a"]]) #returns the second arr
 
   def best_air(hands)
       assess_kickers(hands, 4, 1)
   end
 
-  #best_air([["4a","13b","12a","11b","10a"],["7a","13b","12b","11c","10a"],["3a","13b","12b","11b","10a"]]) #returns second arr
 
   def winning_hand(hand)
     
@@ -446,16 +338,16 @@ letter property) of the cards.
 
 
   def evaluate_hand(cards)
-    return 10 if straight_flush(cards) == "royal flush"
-    return 9 if straight_flush(cards)
-    return 8 if quads(cards)
-    return 7 if full_house(cards)
-    return 6 if flush(cards)
-    return 5 if straight(cards)
-    return 4 if trips(cards)
-    return 3 if two_pair(cards)
-    return 2 if pair(cards)
-    return 1
+    return 9 if straight_flush(r(cards), s(cards)) == "royal flush"
+    return 8 if straight_flush(r(cards), s(cards))
+    return 7 if quads(r(cards))
+    return 6 if full_house(r(cards))
+    return 5 if flush(s(cards))
+    return 4 if straight(r(cards))
+    return 3 if trips(r(cards))
+    return 2 if two_pair(r(cards))
+    return 1 if pair(r(cards))
+    return 0
   end
 
 
@@ -463,36 +355,21 @@ letter property) of the cards.
 
     best_hand = []
     best_hand_score = 0
-
-    hands.each do |hand|
-      if evaluate_hand(hand) > best_hand_score
-        best_hand = [hand]
-        best_hand_score = evaluate_hand(hand)
-      elsif evaluate_hand(hand) == best_hand_score
-        best_hand << hand
-      end
-    end
-    if best_hand.length > 1
-      if best_hand_score == 1
-        best_air(best_hand)
-      elsif best_hand_score == 2
-        best_pair(best_hand)
-      elsif best_hand_score == 3
-        best_two_pair(best_hand)
-      elsif best_hand_score == 4
-        best_trips(best_hand)
-      elsif best_hand_score == 5 || best_hand_score == 9
-        best_straight(best_hand)
-      elsif best_hand_score == 6
-        best_flush(best_hand)
-      elsif best_hand_score == 7
-        best_full_house(best_hand)
-      elsif best_hand_score == 8
-        best_quads(best_hand)
-      else best_hand
-      end
-    else best_hand
-    end
+    hand_scores = hands.map { |hand| evaluate_hand(hand) }
+    
+    best_arr = deduce_best_hand(hand_scores, best_hand, hands, best_hand_score)
+    
+    best_hand = best_arr[0]
+    best_hand_score = best_arr[1]
+    
+    return best_hand if best_hand.length == 1
+    return best_hand if best_hand_score == 9    
+    
+    tie_breaker_methods_arr = [method(:best_air), method(:best_pair), method(:best_two_pair),
+                              method(:best_trips), method(:best_straight), method(:best_flush), 
+                              method(:best_full_house), method(:best_quads), method(:best_straight)]
+    
+    tie_breaker_methods_arr[best_hand_score].call(best_hand)
   end
   
   def visual(cards)
@@ -528,3 +405,27 @@ letter property) of the cards.
   end
   
 end
+
+puts best_hand([["4a","13b","12a","11b","10a"],["7a","13b","12b","11c","10a"],
+["3a","13b","12b","11b","10a"]]).inspect # returns second arr
+
+puts best_hand([["14a","14b","11a","10b","6a"],["14a","12b","14b","10c","13a"],
+["14a","12b","14b","11c","13a"]]).inspect # returns the third arr
+
+puts best_hand([["13a","13b","10a","10b","14a"],["10a","10b","13b","13c","12a"],
+["10a","10b","13b","13c","11a"]]).inspect # returns first arr
+
+puts best_hand([["11a","11b","11c","9a","12b"],["11d","11b","11c","10b","12a"],
+["11d","11b","11c","8b","12a"]]).inspect # returns second arr
+
+puts best_hand([["2a","3a","4a","5a","14a"],["2a","3a","4a","5a","6a"],
+["3a","4a","5a","6a","7a"]]).inspect # returns third arr
+
+puts best_hand([["13a","11a","10a","9a","8a"],["13a","11a","10a","9a","7a"],
+["13a","11a","10a","9a","6a"]]).inspect # returns first arr
+
+puts best_hand([["13a","11b","13c","11a","11d"],["13a","12c","13a","12b","12d"],
+["13a","11b","13c","11a","11d"]]).inspect # returns second arr
+
+puts best_hand([["5a","5b","5c","5d","10a"],["5a","5b","5c","5d","12a"],
+["5a","5b","5c","5d","11a"]]).inspect #returns second arr
