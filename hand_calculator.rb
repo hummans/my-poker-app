@@ -328,7 +328,7 @@ module HandCalculator
     return "STRAIGHT FLUSH!" if straight_flush(r(cards), s(cards))
     return "FOUR OF A KIND!" if quads(r(cards))
     return "FULL HOUSE!" if full_house(r(cards))
-    return "FLUSH!" if flush(hand)
+    return "FLUSH!" if flush(s(cards))
     return "STRAIGHT!" if straight(r(cards))
     return "THREE OF A KIND!" if trips(r(cards))
     return "TWO PAIR!" if two_pair(r(cards))
