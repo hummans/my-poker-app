@@ -324,15 +324,15 @@ module HandCalculator
     # note: the below hand processing statement is not needed for the console version of game.
     #hand = hand.length == 1 ? hand.flatten : hand[0]
 
-    return "ROYAL FLUSH!" if straight_flush(hand) == "royal flush"
-    return "STRAIGHT FLUSH!" if straight_flush(hand)
-    return "FOUR OF A KIND!" if quads(hand)
-    return "FULL HOUSE!" if full_house(hand)
+    return "ROYAL FLUSH!" if straight_flush(r(cards), s(cards)) == "royal flush"
+    return "STRAIGHT FLUSH!" if straight_flush(r(cards), s(cards))
+    return "FOUR OF A KIND!" if quads(r(cards))
+    return "FULL HOUSE!" if full_house(r(cards))
     return "FLUSH!" if flush(hand)
-    return "STRAIGHT!" if straight(hand)
-    return "THREE OF A KIND!" if trips(hand)
-    return "TWO PAIR!" if two_pair(hand)
-    return "PAIR!" if pair(hand)
+    return "STRAIGHT!" if straight(r(cards))
+    return "THREE OF A KIND!" if trips(r(cards))
+    return "TWO PAIR!" if two_pair(r(cards))
+    return "PAIR!" if pair(r(cards))
     return "COMPLETE AIR"
   end
 
