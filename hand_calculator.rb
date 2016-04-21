@@ -119,6 +119,7 @@ module HandCalculator
     end
   end
 
+  
   def straight_flush(r, s)
 
     if s[0] == s[1] && s[1] == s[2] && s[2] == s[3] && s[3] == s[4]
@@ -353,17 +354,14 @@ module HandCalculator
 
   def best_hand(hands)
 
-    best_hand = []
-    best_hand_score = 0
     hand_scores = hands.map { |hand| evaluate_hand(hand) }
     
-    best_arr = deduce_best_hand(hand_scores, best_hand, hands, best_hand_score)
+    best_arr = deduce_best_hand(hand_scores, [], hands, 0)
     
     best_hand = best_arr[0]
     best_hand_score = best_arr[1]
     
-    return best_hand if best_hand.length == 1
-    return best_hand if best_hand_score == 9    
+    return best_hand if (best_hand.length == 1 || best_hand_score == 9)   
     
     tie_breaker_methods_arr = [method(:best_air), method(:best_pair), method(:best_two_pair),
                               method(:best_trips), method(:best_straight), method(:best_flush), 
