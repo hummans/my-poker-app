@@ -13,20 +13,7 @@ module HandCalculator
 
   
   def which_rank_occurs_n_times?(cards, n)
-    
-    arr = []
-    n_occurrences_hash = Hash.new(0)
-    
-    cards.each do |rank|
-      n_occurrences_hash[rank] += 1
-    end
-
-    n_occurrences_hash.each do |rank, occurrence_number|
-      if occurrence_number == n
-        arr << rank
-      end
-    end
-    
+    arr = cards.select { |x| cards.count(x) == n }.uniq
     arr.length == 1 ? arr[0] : arr
   end
 
