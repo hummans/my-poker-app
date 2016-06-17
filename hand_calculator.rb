@@ -1,11 +1,7 @@
 module HandCalculator
 
-
-
-  META_DECK = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }.freeze
-
   def r(cards)
-    cards.map { |card| card.to_i }.sort
+    cards.map(&:to_i).sort
   end
 
 
@@ -15,15 +11,13 @@ module HandCalculator
 
   
   def which_rank_occurs_n_times?(cards, n)
-    arr = cards.select { |x| cards.count(x) == n }.uniq
-    arr.length == 1 ? arr[0] : arr
+    return cards.select { |x| cards.count(x) == n }.uniq
   end
 
   
   def assess_kickers(hands, i)
           
-    best_hand = []
-    kicker = 0
+    best_hand = [], kicker = 0
 
     hands.each do |hand_unrefined|
       nonpair_cards = which_rank_occurs_n_times?(r(hand_unrefined), 1)
@@ -66,13 +60,11 @@ module HandCalculator
   end
 
   
-  def deduce_best_hand(arr, best_hand, hands, best_hand_score = nil)
+  def deduce_best_hand(arr, hands, best_hand = [], best_hand_score = nil)
     
     arr.each_with_index.inject(0) do |max_val, (val, index)|
       if val > max_val
-        if best_hand_score
-          best_hand_score = val
-        end
+        best_hand_score = val if best_hand_score
         best_hand = [hands[index]]
         val
       elsif val == max_val
@@ -169,35 +161,33 @@ module HandCalculator
   end
 
 
-  def best_quads(hands)
+  def best_quads(hands, already_called = false)
 
-    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
+    rank_arrs = hands.map(&method(:r))
     
-    quad_cards = rank_arrs.map { |hand| which_rank_occurs_n_times?(hand, 4) }
+    if !already_called
+      quad_cards = rank_arrs.map { |hand| which_rank_occurs_n_times?(hand, 4) }.flatten
+      best_hand = deduce_best_hand(quad_cards, hands)
+      return best_hand.length == 1 ? best_hand : best_quads(best_hand, true)
+    end
     
-    kickers = rank_arrs.map { |hand| which_rank_occurs_n_times?(hand, 1) }
-    
-    best_hand = deduce_best_hand(quad_cards, best_hand, hands)
-    
-    return best_hand.length == 1 ? best_hand : deduce_best_hand(kickers, best_hand, hands)
+    return assess_kickers(hands, 0)
   end
 
 
-  def best_full_house(hands, already_called = false)
+  def best_full_house(hands, compare = "trips")
   
-    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
+    rank_arrs = hands.map(&method(:r))
     
-    if !already_called
-      trip_cards = rank_arrs.map { |hand| which_rank_occurs_n_times?(hand, 3) }
-    
-      best_hand = deduce_best_hand(trip_cards, best_hand, hands)
-      
-      return best_hand.length == 1 ? best_hand : best_full_house(best_hand, true)
+    if compare == "trips"
+      trip_cards = rank_arrs.map { |hand| which_rank_occurs_n_times?(hand, 3) }.flatten
+      best_hand = deduce_best_hand(trip_cards, hands)
+      return best_hand.length == 1 ? best_hand : best_full_house(best_hand, "pair")
     end
     
-    pair_cards = rank_arrs.map { |hand| which_rank_occurs_n_times?(hand, 2) }
+    pair_cards = rank_arrs.map { |hand| which_rank_occurs_n_times?(hand, 2) }.flatten
     
-    return deduce_best_hand(pair_cards, best_hand, hands)
+    return deduce_best_hand(pair_cards, hands)
   end
 
 
@@ -208,58 +198,52 @@ module HandCalculator
 
   def best_straight(hands)
       
-    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
+    rank_arrs = hands.map(&method(:r))
+    
     rank_sums = rank_arrs.map do |rank_arr|
       rank_arr[4] = 1 if (rank_arr[4] == 14 && rank_arr[0] == 2)
       rank_arr.inject(:+)
     end
     
-    return deduce_best_hand(rank_sums, best_hand, hands)
+    return deduce_best_hand(rank_sums, hands)
   end
 
 
   def best_trips(hands)
     
-    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
-    
-    trip_cards = rank_arrs.map do |hand|
-      which_rank_occurs_n_times?(hand, 3)
-    end
-
-    best_hand = deduce_best_hand(trip_cards, best_hand, hands)
+    rank_arrs = hands.map(&method(:r))
+    trip_cards = rank_arrs.map { |hand| which_rank_occurs_n_times?(hand, 3) }.flatten
+    best_hand = deduce_best_hand(trip_cards, hands)
 
     return best_hand.length == 1 ? best_hand : assess_kickers(best_hand, 1)
   end
 
 
-  def best_two_pair(hands)
+  def best_two_pair(hands, compare = "top_pair")
 
-    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
-    top_pairs = rank_arrs.map do |rank_arr|
-      which_rank_occurs_n_times?(rank_arr, 2).max
-    end
-    bottom_pairs = rank_arrs.map do |rank_arr|
-      which_rank_occurs_n_times?(rank_arr, 2).min
-    end
-    kickers = rank_arrs.map do |rank_arr|
-      which_rank_occurs_n_times?(rank_arr, 1) 
+    rank_arrs = hands.map(&method(:r))
+    
+    if compare == "top_pair"
+      top_pairs = rank_arrs.map { |rank_arr| which_rank_occurs_n_times?(rank_arr, 2).max }
+      best_hand = deduce_best_hand(top_pairs, hands)
+      return best_hand.length == 1 ? best_hand : best_two_pair(best_hand, "bottom_pair")
     end
     
-    best_hand = deduce_best_hand(top_pairs, best_hand, hands)
+    if compare == "bottom_pair"
+      bottom_pairs = rank_arrs.map { |rank_arr| which_rank_occurs_n_times?(rank_arr, 2).min }
+      best_hand = deduce_best_hand(bottom_pairs, hands)
+      return best_hand.length == 1 ? best_hand : best_two_pair(best_hand, "kickers")
+    end
     
-    return best_hand.length > 1 ? 
-    (deduce_best_hand(bottom_pairs, best_hand, hands).length > 1 ? 
-    deduce_best_hand(kickers, best_hand, hands) : best_hand) : best_hand
+    return assess_kickers(hands, 0)
   end
 
 
   def best_pair(hands)
-
-    best_hand = [], rank_arrs = hands.map { |hand| r(hand) }
     
-    pair_cards = rank_arrs.map { |hand| which_rank_occurs_n_times?(hand, 2) }
-    
-    best_hand = deduce_best_hand(pair_cards, best_hand, hands)
+    rank_arrs = hands.map(&method(:r))
+    pair_cards = rank_arrs.map { |hand| which_rank_occurs_n_times?(hand, 2) }.flatten
+    best_hand = deduce_best_hand(pair_cards, hands, best_hand)
     
     return best_hand.length == 1 ? best_hand : assess_kickers(best_hand, 2)
   end
@@ -305,9 +289,7 @@ module HandCalculator
   def best_hand(hands)
 
     hand_scores = hands.map { |hand| evaluate_hand(hand) }
-    
-    best_arr = deduce_best_hand(hand_scores, [], hands, 0)
-    
+    best_arr = deduce_best_hand(hand_scores, hands, [], 0)
     best_hand = best_arr[0]
     best_hand_score = best_arr[1]
     
@@ -375,5 +357,5 @@ end
 # puts best_hand([["13a","11b","13c","11a","13d"],["13a","12c","13a","13b","12d"],
 # ["13a","11b","13c","11a","11d"]]).inspect # returns second arr
 
-# puts best_hand([["5a","5b","5c","5d","10a"],["5a","5b","5c","5d","12a"],
+# puts best_hand([["3a","3b","3c","3d","13a"],["5a","5b","5c","5d","12a"],
 # ["5a","5b","5c","5d","11a"]]).inspect #returns second arr
