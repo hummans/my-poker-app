@@ -303,6 +303,8 @@ module HandCalculator
   end
   
   def visual(cards)
+
+    ordered_deck = ("2".."14").flat_map { |rank| ("a".."d").map { |suit| (rank + suit) } }
     
     card_hash = { "2" => " 2", "3" => " 3", "4" => " 4", "5" => " 5", "6" => " 6", "7" => " 7", 
       "8" => " 8", "9" => " 9", "10" => "10", "11" => "J ", "12" => "Q ", "13" => "K ", "14" => "A " }
@@ -316,7 +318,7 @@ module HandCalculator
         if i == 0
           to_put += " ______"
         elsif i == 1
-          to_put += "|#{suits[ META_DECK.index(cards[j]) % 4 ]}    |"
+          to_put += "|#{suits[ordered_deck.index(cards[j]) % 4 ]}    |"
         elsif i == 2
           if cards[j].to_i < 10 
             to_put += "| #{card_hash[cards[j][0]]}  |"
@@ -324,7 +326,7 @@ module HandCalculator
             to_put += "|  #{card_hash[cards[j][0..1]]} |"
           end
         elsif i == 3
-          to_put += "|____#{suits[ META_DECK.index(cards[j]) % 4 ]}|" 
+          to_put += "|____#{suits[ordered_deck.index(cards[j]) % 4 ]}|" 
         end
         j += 1
       end
